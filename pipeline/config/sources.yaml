@@ -1,0 +1,293 @@
+sources:
+  - source_id: hsy_buildings
+    name: HSY metropolitan buildings
+    source_url: https://kartta.hsy.fi/geoserver/wfs
+    licence_url: https://creativecommons.org/licenses/by/4.0/
+    licence_id: CC-BY-4.0
+    attribution: Helsingin seudun ympäristöpalvelut HSY
+    retrieved_at: null
+    vintage: null
+    coverage: Helsinki, Espoo, Vantaa, Kauniainen
+    checksum: null
+    processing_method: WFS download and direct normalization
+    caveats:
+      - Resolve the qualified layer name from GetCapabilities at build time.
+    redistribution_decision: allowed
+    rationale: The published dataset is CC BY 4.0.
+    schema_version: null
+  - source_id: helsinki_buildings
+    name: Helsinki buildings
+    source_url: https://kartta.hel.fi/ws/geoserver/avoindata/wfs
+    licence_url: https://creativecommons.org/licenses/by/4.0/
+    licence_id: CC-BY-4.0
+    attribution: Helsingin kaupunki
+    retrieved_at: null
+    vintage: null
+    coverage: Helsinki
+    checksum: null
+    processing_method: VTJ-PRT join with direct building facts and Building Classification 2018 mapping
+    caveats:
+      - Only classes 0110, 0111, 0112, 0120, and 0121 map to release-1 house types.
+      - Lift, heating, storey, and dwelling fields cover Helsinki only; blank or unmapped source fields remain unknown.
+    redistribution_decision: allowed
+    rationale: The published dataset is CC BY 4.0.
+    schema_version: null
+  - source_id: vantaa_buildings
+    name: Vantaa buildings
+    source_url: https://gis.vantaa.fi/geoserver/wfs
+    licence_url: https://creativecommons.org/licenses/by/4.0/
+    licence_id: CC-BY-4.0
+    attribution: Vantaan kaupunki
+    retrieved_at: null
+    vintage: null
+    coverage: Vantaa
+    checksum: null
+    processing_method: VTJ-PRT join with Building Classification 2018 mapping
+    caveats:
+      - Only classes 0110, 0111, 0112, 0120, and 0121 map to release-1 house types.
+    redistribution_decision: allowed
+    rationale: The published dataset is CC BY 4.0.
+    schema_version: null
+  - source_id: espoo_city_land
+    name: Espoo city land ownership
+    source_url: https://hri.fi/data/dataset/espoon-kaupungin-maanomistus
+    licence_url: https://creativecommons.org/licenses/by/4.0/
+    licence_id: CC-BY-4.0
+    attribution: Espoon kaupunki
+    retrieved_at: null
+    vintage: null
+    coverage: Espoo
+    checksum: null
+    processing_method: Offline positive city-owner evidence overlay
+    caveats:
+      - Validate machine-separable long-term lease portrayal before tenure classification.
+    redistribution_decision: allowed
+    rationale: The published dataset is CC BY 4.0.
+    schema_version: null
+  - source_id: vantaa_property_map
+    name: Vantaa property map
+    source_url: https://gis.vantaa.fi/geoserver/wfs
+    licence_url: https://creativecommons.org/licenses/by/4.0/
+    licence_id: CC-BY-4.0
+    attribution: Vantaan kaupunki
+    retrieved_at: null
+    vintage: null
+    coverage: Vantaa
+    checksum: null
+    processing_method: Offline positive lease-area evidence overlay
+    caveats:
+      - Validate the published taso and teksti encoding before classifying lease-area features.
+    redistribution_decision: allowed
+    rationale: The published dataset is CC BY 4.0.
+    schema_version: null
+  - source_id: helsinki_lease_decisions
+    name: Helsinki public lease decisions
+    source_url: https://paatokset.hel.fi/fi/
+    licence_url: https://paatokset.hel.fi/fi/
+    licence_id: decision-evidence
+    attribution: Helsingin kaupunki
+    retrieved_at: null
+    vintage: null
+    coverage: Helsinki
+    checksum: null
+    processing_method: Manually validated positive property-linked lease evidence
+    caveats:
+      - A decision must identify the relevant parcel or building and lessor unambiguously.
+      - Do not publish personal names or bulk republish decision documents.
+    redistribution_decision: derived_only
+    rationale: Public release contains only normalized factual evidence and source links.
+    schema_version: null
+  - source_id: hsl_osm_extract
+    name: HSL-area OpenStreetMap extract
+    source_url: https://karttapalvelu.storage.hsldev.com/hsl.osm/hsl.osm.pbf
+    licence_url: https://www.openstreetmap.org/copyright
+    licence_id: ODbL-1.0
+    attribution: OpenStreetMap contributors
+    retrieved_at: null
+    vintage: null
+    coverage: HSL service area
+    checksum: null
+    processing_method: Offline routing and destination extraction
+    caveats:
+      - Record extract date and comply with ODbL derivative-database obligations.
+    redistribution_decision: derived_only
+    rationale: Derived public artifacts require the recorded ODbL attribution and review.
+    schema_version: null
+  - source_id: helsinki_noise_2022
+    name: Helsinki traffic noise zones
+    source_url: https://kartta.hel.fi/ws/geoserver/avoindata/wfs
+    licence_url: https://creativecommons.org/licenses/by/4.0/
+    licence_id: CC-BY-4.0
+    attribution: Helsingin kaupunki
+    retrieved_at: null
+    vintage: null
+    coverage: Helsinki
+    checksum: null
+    processing_method: Offline maximum daytime noise-zone upper-bound aggregation
+    caveats:
+      - Admit only a documented 2022 LAeq 7-22 layer with compatible method and height.
+    redistribution_decision: allowed
+    rationale: The selected open dataset must confirm its licence at build time.
+    schema_version: null
+  - source_id: helsinki_noise_night_2022
+    name: Helsinki nighttime traffic noise zones
+    source_url: https://kartta.hel.fi/ws/geoserver/avoindata/wfs
+    licence_url: https://creativecommons.org/licenses/by/4.0/
+    licence_id: CC-BY-4.0
+    attribution: Helsingin kaupunki
+    retrieved_at: null
+    vintage: null
+    coverage: Helsinki
+    checksum: null
+    processing_method: Offline maximum nighttime noise-zone upper-bound aggregation
+    caveats:
+      - Admit only the documented 2022 LAeq 22-7 combined-noise layer with the compatible two-metre calculation height.
+    redistribution_decision: allowed
+    rationale: The selected open dataset must confirm its licence at build time.
+    schema_version: null
+  - source_id: helsinki_active_plans
+    name: Helsinki active detailed-plan areas
+    source_url: https://kartta.hel.fi/ws/geoserver/avoindata/wfs
+    licence_url: https://creativecommons.org/licenses/by/4.0/
+    licence_id: CC-BY-4.0
+    attribution: Helsingin kaupunki
+    retrieved_at: null
+    vintage: null
+    coverage: Helsinki
+    checksum: null
+    processing_method: Offline building-footprint intersection with active detailed-plan areas
+    caveats:
+      - An active planning area does not predict construction timing, scale, or disturbance.
+    redistribution_decision: allowed
+    rationale: The published dataset is CC BY 4.0.
+    schema_version: null
+  - source_id: espoo_noise_2022
+    name: Espoo noise zones
+    source_url: https://kartat.espoo.fi/teklaogcweb/wms.ashx?request=GetCapabilities
+    licence_url: https://creativecommons.org/licenses/by/4.0/
+    licence_id: CC-BY-4.0
+    attribution: Espoon kaupunki
+    retrieved_at: null
+    vintage: null
+    coverage: Espoo
+    checksum: null
+    processing_method: Offline maximum daytime noise-zone upper-bound aggregation
+    caveats:
+      - Admit only a documented 2022 LAeq 7-22 layer with compatible method and height.
+    redistribution_decision: allowed
+    rationale: The selected open dataset must confirm its licence at build time.
+    schema_version: null
+  - source_id: metro_noise_2012_fallback
+    name: Metropolitan traffic noise zones 2012
+    source_url: https://hri.fi/data/en_GB/dataset/paakaupunkiseudun-liikennemeluvyohykkeet
+    licence_url: https://creativecommons.org/licenses/by/4.0/
+    licence_id: CC-BY-4.0
+    attribution: Helsingin seudun ympäristöpalvelut HSY
+    retrieved_at: null
+    vintage: null
+    coverage: Helsinki, Espoo, Vantaa, Kauniainen
+    checksum: null
+    processing_method: Offline fallback aggregation only
+    caveats:
+      - The 2012 fallback must remain visibly distinct from current municipal data.
+    redistribution_decision: allowed
+    rationale: The published dataset is CC BY 4.0.
+    schema_version: null
+  - source_id: hsy_land_cover_2022
+    name: HSY metropolitan land cover
+    source_url: https://hri.fi/data/en_GB/dataset/paakaupunkiseudun-maanpeiteaineisto
+    licence_url: https://creativecommons.org/licenses/by/4.0/
+    licence_id: CC-BY-4.0
+    attribution: Helsingin seudun ympäristöpalvelut HSY
+    retrieved_at: null
+    vintage: null
+    coverage: Helsinki, Espoo, Vantaa, Kauniainen
+    checksum: null
+    processing_method: Offline source-designated forest destination extraction
+    caveats:
+      - Record the selected release resolution and mapping-unit caveat.
+    redistribution_decision: allowed
+    rationale: The selected open dataset must confirm its licence at build time.
+    schema_version: null
+  - source_id: hsl_gtfs
+    name: HSL GTFS schedules
+    source_url: https://infopalvelut.storage.hsldev.com/gtfs/hsl.zip
+    licence_url: https://creativecommons.org/licenses/by/4.0/
+    licence_id: CC-BY-4.0
+    attribution: HSL
+    retrieved_at: null
+    vintage: null
+    coverage: HSL service area
+    checksum: null
+    processing_method: Offline representative-weekday transit routing
+    caveats:
+      - Record the configured valid weekday, samples, parameters, and failed routes.
+    redistribution_decision: allowed
+    rationale: HSL publishes GTFS as CC BY 4.0.
+    schema_version: null
+  - source_id: service_map_education
+    name: Service Map education and daycare units
+    source_url: https://kartta.hel.fi/ws/geoserver/avoindata/wfs
+    licence_url: https://creativecommons.org/licenses/by/4.0/
+    licence_id: CC-BY-4.0
+    attribution: Helsingin kaupunki ja pääkaupunkiseudun kunnat
+    retrieved_at: null
+    vintage: null
+    coverage: Helsinki, Espoo, Vantaa, Kauniainen
+    checksum: null
+    processing_method: Offline service-category filtering and pedestrian routing
+    caveats:
+      - Only physical published service units matching the documented service labels are included.
+    redistribution_decision: allowed
+    rationale: The Service Map source is published under CC BY 4.0.
+    schema_version: null
+  - source_id: ptv_healthcare
+    name: PTV wellbeing service locations
+    source_url: https://api-gw.palvelutietovaranto.suomi.fi/api/v12
+    licence_url: https://creativecommons.org/publicdomain/zero/1.0/
+    licence_id: CC0-1.0
+    attribution: Digi- ja väestötietovirasto
+    retrieved_at: null
+    vintage: null
+    coverage: Helsinki, Espoo, Vantaa, Kauniainen
+    checksum: null
+    processing_method: Offline physical-location filtering, PTV service-link classification, and transparent provider/name classification
+    caveats:
+      - Private-provider entries in PTV are voluntary and can be incomplete.
+      - Dental, neuvola, mental-health/substance-use, and social-service groups require an explicit linked PTV service class.
+    redistribution_decision: allowed
+    rationale: PTV data is published under CC0.
+    schema_version: null
+  - source_id: paavo_income
+    name: Statistics Finland Paavo postal-area income
+    source_url: https://geo.stat.fi/geoserver/postialue/wfs
+    licence_url: https://stat.fi/fi/palvelut/tilastodatapalvelut/paikkatietoaineistot/postinumeroalueittainen-paikkatieto-paavo
+    licence_id: open
+    attribution: Tilastokeskus, Paavo
+    retrieved_at: null
+    vintage: null
+    coverage: Finland
+    checksum: null
+    processing_method: Offline postal-area assignment with suppressed values normalized to unknown
+    caveats:
+      - Postal-area income is contextual, not a building-level measurement.
+      - Source value -1 is suppressed and must become unknown.
+    redistribution_decision: allowed
+    rationale: Paavo is a free postal-area statistics dataset.
+    schema_version: null
+  - source_id: helsinki_owner_map_excluded
+    name: Restricted Helsinki owner map
+    source_url: https://kartta.hel.fi/paikkatietohakemisto/pth/?id=385
+    licence_url: https://kartta.hel.fi/paikkatietohakemisto/pth/?id=385
+    licence_id: restricted
+    attribution: Helsingin kaupunki
+    retrieved_at: null
+    vintage: null
+    coverage: Helsinki
+    checksum: null
+    processing_method: Not used
+    caveats:
+      - Must not be downloaded, reconstructed, traced, or published.
+    redistribution_decision: excluded
+    rationale: Terms restrict publication outside internal city work.
+    schema_version: null

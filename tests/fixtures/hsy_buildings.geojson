@@ -1,0 +1,8 @@
+{
+  "type": "FeatureCollection",
+  "features": [{
+    "type": "Feature",
+    "properties": {"kunta": "091", "vtj_prt": "fixture-1", "raktun": "local-1", "kavu": 1970, "kayttark": 101, "kayttarks": "Asuinrakennus"},
+    "geometry": {"type": "Polygon", "coordinates": [[[24.9, 60.1], [24.91, 60.1], [24.91, 60.11], [24.9, 60.11], [24.9, 60.1]]]}
+  }]
+}

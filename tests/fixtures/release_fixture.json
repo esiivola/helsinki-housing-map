@@ -1,0 +1,106 @@
+{
+  "schema_version": "1.0.0",
+  "source_manifests": [
+    {
+      "source_id": "hsy_buildings",
+      "name": "HSY metropolitan buildings",
+      "source_url": "https://example.test/hsy-buildings",
+      "licence_url": "https://creativecommons.org/licenses/by/4.0/",
+      "licence_id": "CC-BY-4.0",
+      "attribution": "Helsingin seudun ympäristöpalvelut HSY",
+      "retrieved_at": "2026-08-26T10:00:00+00:00",
+      "vintage": "2026-08-26",
+      "coverage": "Helsinki metropolitan area",
+      "checksum": "sha256:buildings",
+      "processing_method": "direct normalization",
+      "caveats": ["synthetic fixture"],
+      "redistribution_decision": "allowed",
+      "rationale": "Open licence confirmed",
+      "schema_version": "2026-08"
+    },
+    {
+      "source_id": "espoo_city_land",
+      "name": "Espoo city land ownership",
+      "source_url": "https://example.test/espoo",
+      "licence_url": "https://creativecommons.org/licenses/by/4.0/",
+      "licence_id": "CC-BY-4.0",
+      "attribution": "Espoon kaupunki",
+      "retrieved_at": "2026-08-26T10:00:00+00:00",
+      "vintage": "2026-08-19",
+      "coverage": "Espoo",
+      "checksum": "sha256:open",
+      "processing_method": "official spatial overlay",
+      "caveats": ["positive evidence only"],
+      "redistribution_decision": "allowed",
+      "rationale": "Open licence confirmed",
+      "schema_version": "2026-08"
+    }
+  ],
+  "evidence": [
+    {
+      "evidence_id": "evidence-1",
+      "source_id": "espoo_city_land",
+      "source_url": "https://example.test/evidence",
+      "retrieved_at": "2026-08-26T10:00:00+00:00",
+      "vintage": "2026-08-19",
+      "claim": "city",
+      "method": "direct",
+      "confidence": "high",
+      "caveat_ids": []
+    }
+  ],
+  "buildings": [
+    {
+      "source_id": "hsy_buildings",
+      "source_record_id": "fixture-record-1",
+      "national_building_id": "fixture-building-1",
+      "municipality": "Helsinki",
+      "completed": true,
+      "residential_use": true,
+      "house_type_code": "kerrostalo",
+      "construction_years": [1940, 1970]
+    },
+    {
+      "source_id": "hsy_buildings", "source_record_id": "fixture-record-2", "national_building_id": "fixture-building-noise", "municipality": "Helsinki", "completed": true, "residential_use": true, "house_type_code": "kerrostalo", "construction_years": [1970]
+    },
+    {
+      "source_id": "hsy_buildings", "source_record_id": "fixture-record-3", "national_building_id": "fixture-building-partial", "municipality": "Helsinki", "completed": true, "residential_use": true, "house_type_code": "kerrostalo", "construction_years": [1970]
+    },
+    {
+      "source_id": "hsy_buildings", "source_record_id": "fixture-record-4", "national_building_id": "fixture-building-mixed", "municipality": "Helsinki", "completed": true, "residential_use": true, "house_type_code": "kerrostalo", "construction_years": [1970]
+    }
+  ],
+  "layer_values": [
+    {
+      "building_id": "fixture-building-1",
+      "layer_id": "land_owner_class",
+      "state": "known",
+      "kind": "scalar",
+      "value": "city",
+      "coverage": 1,
+      "evidence_ids": ["evidence-1"],
+      "method": "direct",
+      "confidence": "high"
+    },
+    {
+      "building_id": "fixture-building-1",
+      "layer_id": "noise_day_upper_db",
+      "state": "unknown",
+      "kind": "scalar",
+      "value": null,
+      "coverage": 0,
+      "evidence_ids": [],
+      "method": "aggregated",
+      "confidence": "low"
+    },
+    {
+      "building_id": "fixture-building-noise", "layer_id": "noise_day_upper_db", "state": "known", "kind": "scalar", "value": 60, "coverage": 1, "evidence_ids": ["evidence-1"], "method": "aggregated", "confidence": "medium"
+    },
+    {
+      "building_id": "fixture-building-partial", "layer_id": "noise_day_upper_db", "state": "partial", "kind": "scalar", "value": 50, "coverage": 0.7, "evidence_ids": ["evidence-1"], "method": "aggregated", "confidence": "medium"
+    },
+    {
+      "building_id": "fixture-building-mixed", "layer_id": "land_owner_class", "state": "known", "kind": "distribution", "value": "mixed", "distribution": {"city": 0.6, "non_city": 0.4}, "coverage": 1, "evidence_ids": ["evidence-1"], "method": "aggregated", "confidence": "high"
+    }
+  ]
+}

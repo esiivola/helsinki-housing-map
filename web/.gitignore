@@ -1,0 +1,4 @@
+# Local environment overrides (may hold the CARTO basemap key). Vite loads these
+# at build time; keep them out of version control.
+.env.local
+.env.*.local

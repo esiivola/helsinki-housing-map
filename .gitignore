@@ -1,0 +1,22 @@
+# Restricted or local-only land-evidence inputs and outputs
+/local_tools/
+/.venv/
+/.pytest_cache/
+/.DS_Store
+__pycache__/
+*.py[cod]
+/data/raw/
+/data/intermediate/
+/data/release/
+/data/tools/
+/data/work/
+/data/**/aluevuokraus_*
+/data/**/helsinki_area_rentals_local*
+/data/**/municipal_land_evidence_local*
+/data/**/local-municipal-land*
+/data/**/espoo_city_land_wms*
+/web/node_modules/
+/web/dist/
+/web/public/
+/web/.claude/
+/public-data-*.tar.gz

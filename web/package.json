@@ -1,0 +1,26 @@
+{
+  "name": "helsinki-housing-map-web",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "bash ../scripts/build_web_release.sh",
+    "check:static-assets": "node scripts/verify-static-assets.mjs",
+    "test": "vitest run",
+    "test:e2e": "node scripts/verify-e2e.mjs"
+  },
+  "dependencies": {
+    "maplibre-gl": "^6.6.0",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4"
+  },
+  "devDependencies": {
+    "@types/geojson": "^7946.0.16",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.1",
+    "playwright": "^1.62.1",
+    "typescript": "^7.0.2",
+    "vite": "^8.0.1",
+    "vitest": "^4.1.11"
+  }
+}

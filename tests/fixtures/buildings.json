@@ -1,0 +1,39 @@
+[
+  {
+    "source_id": "hsy_buildings",
+    "source_record_id": "record-1",
+    "national_building_id": "national-100",
+    "municipality": "Helsinki",
+    "completed": true,
+    "residential_use": true,
+    "house_type_code": "kerrostalo",
+    "construction_years": [1940, 1970]
+  },
+  {
+    "source_id": "hsy_buildings",
+    "source_record_id": "record-without-national-id",
+    "municipality": "Vantaa",
+    "completed": true,
+    "residential_use": false,
+    "house_type_code": "rivitalo",
+    "construction_years": [2001]
+  },
+  {
+    "source_id": "hsy_buildings",
+    "source_record_id": "incomplete-record",
+    "municipality": "Espoo",
+    "completed": false,
+    "residential_use": true,
+    "house_type_code": "kerrostalo",
+    "construction_years": [2020]
+  },
+  {
+    "source_id": "hsy_buildings",
+    "source_record_id": "unmapped-use",
+    "municipality": "Kauniainen",
+    "completed": true,
+    "residential_use": null,
+    "house_type_code": "unmapped",
+    "construction_years": []
+  }
+]

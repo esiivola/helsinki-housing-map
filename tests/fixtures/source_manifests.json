@@ -1,0 +1,36 @@
+[
+  {
+    "source_id": "espoo_city_land",
+    "name": "Espoo city land ownership",
+    "source_url": "https://example.test/espoo",
+    "licence_url": "https://creativecommons.org/licenses/by/4.0/",
+    "licence_id": "CC-BY-4.0",
+    "attribution": "Espoon kaupunki",
+    "retrieved_at": "2026-08-26T10:00:00+00:00",
+    "vintage": "2026-08-19",
+    "coverage": "Espoo",
+    "checksum": "sha256:open",
+    "processing_method": "official spatial overlay",
+    "caveats": ["positive evidence only"],
+    "redistribution_decision": "allowed",
+    "rationale": "Open licence confirmed",
+    "schema_version": "2026-08"
+  },
+  {
+    "source_id": "helsinki_owner_map_excluded",
+    "name": "Restricted Helsinki owner map",
+    "source_url": "https://example.test/restricted",
+    "licence_url": "https://example.test/terms",
+    "licence_id": "restricted",
+    "attribution": "Helsingin kaupunki",
+    "retrieved_at": "2026-08-26T10:00:00+00:00",
+    "vintage": "2026-08-26",
+    "coverage": "Helsinki",
+    "checksum": "sha256:restricted",
+    "processing_method": "not used",
+    "caveats": ["excluded"],
+    "redistribution_decision": "excluded",
+    "rationale": "Publication is not permitted",
+    "schema_version": "2026-08"
+  }
+]

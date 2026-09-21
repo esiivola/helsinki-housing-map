@@ -1,0 +1,32 @@
+sources:
+  - source_id: fixture_allowed
+    name: Fixture allowed source
+    source_url: https://example.test/allowed
+    licence_url: https://creativecommons.org/licenses/by/4.0/
+    licence_id: CC-BY-4.0
+    attribution: Fixture publisher
+    retrieved_at: 2026-08-26T10:00:00+00:00
+    vintage: "2026-08-26"
+    coverage: Helsinki
+    checksum: sha256:fixture-allowed
+    processing_method: fixture normalization
+    caveats:
+      - fixture only
+    redistribution_decision: allowed
+    rationale: Open licence confirmed
+    schema_version: "2026-08"
+  - source_id: fixture_excluded
+    name: Fixture excluded source
+    source_url: https://example.test/excluded
+    licence_url: https://example.test/terms
+    licence_id: restricted
+    attribution: Fixture publisher
+    retrieved_at: 2026-08-26T10:00:00+00:00
+    vintage: "2026-08-26"
+    coverage: Helsinki
+    checksum: sha256:fixture-excluded
+    processing_method: not used
+    caveats:
+      - excluded
+    redistribution_decision: excluded
+    rationale: Publication prohibited
