@@ -229,7 +229,8 @@ try {
   const inspectorMilliseconds = [];
   for (let index = 0; index < 20; index += 1) {
     inspectorMilliseconds.push(await measureLoadedInspector(3));
-    await inspector.getByRole("button", { name: "Sulje" }).click();
+    await inspector.getByRole("button", { name: "Sulje" }).click({ noWaitAfter: true });
+    await inspector.waitFor({ state: "detached" });
   }
   await page.setViewportSize({ width: 390, height: 844 });
   await mapMenu.locator(":scope > summary").click();

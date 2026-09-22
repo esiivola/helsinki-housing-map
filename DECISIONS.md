@@ -472,3 +472,17 @@ Known point destinations use nearby pedestrian-network candidates within 150 met
 ## 2026-09-14 — Active-plan popup details
 
 The active detailed-plan overlay publishes only the plan number, type, status, area, available approval entry, and source update date. Clicking a visible plan area shows these fields in a popup and takes precedence over building selection. The popup is descriptive only: it does not imply a construction timetable, scope, or disturbance forecast.
+
+## 2026-09-21 — GitHub Pages project subpath
+
+- Symptom: the deployed page returned 404 for its JavaScript and CSS assets.
+- Root cause: the Pages workflow built Vite with its default `/` base while the repository site is published below `/helsinki-housing-map/`.
+- Fix: set `VITE_BASE_PATH` in the Pages build job and assert it in a workflow regression test.
+- Rule: every GitHub Pages project site must build with its repository subpath as Vite's base.
+
+## 2026-09-22 — Inspector benchmark closing sequence
+
+- Symptom: the browser proof intermittently timed out after clicking the inspector's close button.
+- Root cause: the benchmark expected Playwright's navigation wait after a synchronous React unmount that never navigates.
+- Fix: close without waiting for navigation, then explicitly wait for the inspector to detach before opening it again.
+- Rule: UI tests must wait for the state transition their action causes, not an unrelated navigation.

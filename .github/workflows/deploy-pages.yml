@@ -34,6 +34,8 @@ jobs:
           mkdir -p web/public
           tar -xzf "$RUNNER_TEMP/$asset" -C web/public
       - name: Build site
+        env:
+          VITE_BASE_PATH: /helsinki-housing-map/
         run: |
           cd web
           npm ci
