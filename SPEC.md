@@ -78,7 +78,7 @@ The app does not provide separate investor and resident modes in release 1.
 | ID | Finnish label | Kind | Stored building value | Release 1 source strategy |
 |---|---|---|---|---|
 | `building_year` | Rakennusvuosi | numeric/multi-value | All known construction years associated with the building record | HSY metropolitan buildings |
-| `house_type` | Talotyyppi | categorical/multi-value | Canonical values: `omakotitalo`, `paritalo`, `rivitalo`, `kerrostalo` | Helsinki building-register classification join; unmappable codes remain unknown |
+| `house_type` | Talotyyppi | categorical/multi-value | Canonical values: `omakotitalo`, `paritalo`, `rivitalo`, `kerrostalo` | Helsinki, Espoo, and Vantaa building-register classification joins; unmappable codes remain unknown |
 | `elevator` | Hissi | categorical | `yes` when the Helsinki building register explicitly marks a lift; otherwise unknown | Helsinki building register only; a blank flag is not inferred to mean no lift |
 | `heating_method` | Lämmitystapa | categorical | Canonical main-heating-method value | Helsinki building-register code mapping; unmapped codes remain unknown |
 | `heating_energy_source` | Lämmitysenergian lähde | categorical | Canonical main heating-energy-source value | Helsinki building-register code mapping; unmapped codes remain unknown |
@@ -182,6 +182,7 @@ These are implementation recommendations, not permission to add dependencies wit
 |---|---|---|---|
 | [HSY metropolitan buildings](https://hri.fi/data/fi/dataset/paakaupunkiseudun-rakennukset) | Building polygons, residential filtering, year, use/type | All four cities | CC BY 4.0; updated about every two weeks. The source notes uncertainty in some older building records. |
 | [Helsinki open geographic data](https://www.hel.fi/en/decision-making/information-on-helsinki/maps-and-geospatial-data/make-better-use-of-geospatial-data/open-geographic-data) | Helsinki open geometry and supporting layers | Helsinki | City Survey open datasets are normally CC BY 4.0 unless a dataset says otherwise. A layer is usable only when its own catalogue entry confirms it is open. |
+| [Espoo buildings](https://hri.fi/data/fi/dataset/espoon-rakennukset) | House-type classification | Espoo | CC BY 4.0 weekly-updated building polygons; join `PYSYVARAKENNUSTUNNUS` and map only documented Building Classification 2018 classes. |
 | [Vantaa property map](https://hri.fi/data/fi/dataset/vantaan-kiinteistokartta) | Positive lease-area evidence | Vantaa | CC BY 4.0, WFS/WMS. The map includes property, parcel, lease-area, and right-of-use boundaries, but its published attributes must be validated before classification. |
 | [Helsinki traffic-noise zones](https://hri.fi/data/en_GB/dataset/helsingin-kaupungin-meluselvitys-2017) | 2022 daytime noise | Helsinki | CC BY 4.0; modeled zones are indicative and method/height must be shown. |
 | [Espoo noise zones](https://hri.fi/data/en/dataset/espoon-melualueet) | 2022 daytime noise | Espoo | CC BY 4.0; modeled and indicative. |
@@ -201,6 +202,7 @@ Metadata pages remain authoritative for licence and caveat checks. The following
 |---|---|---|
 | `hsy_buildings` | [HSY dataset page](https://www.hsy.fi/ymparistotieto/avoindata/avoin-data---sivut/paakaupunkiseudun-rakennukset/), [HRI WFS resource](https://hri.fi/data/fi/dataset/paakaupunkiseudun-rakennukset/resource/81241625-f096-41c0-ad49-43fba2d92b9e), [HSY WFS](https://kartta.hsy.fi/geoserver/wfs), [WFS usage guide](https://www.hsy.fi/4a7f06/globalassets/ymparistotieto/tiedostot/hsy-rajapintaohje-wfs-saavutettava.pdf) | Request the `pks_rakennukset_paivittyva` layer. Resolve the current qualified feature name from GetCapabilities rather than assuming a namespace. |
 | `helsinki_buildings` | [Dataset catalogue](https://avoindata.suomi.fi/data/fi/dataset/helsingin-rakennukset), [field metadata](https://kartta.hel.fi/avoindata/dokumentit/Rakennusrekisteri_avoindata_metatiedot_20160601.pdf), [code lists](https://kartta.hel.fi/avoindata/dokumentit/2017-01-10_Rakennusaineisto_avoindata_koodistot.pdf), [Helsinki WFS](https://kartta.hel.fi/ws/geoserver/avoindata/wfs) | Join by `vtj_prt`. Use `c_hissi`, `c_lammtapa`, `c_poltaine`, `i_kerrlkm`, and `i_asuinhuoneistojen_lkm` directly. This source covers Helsinki only; missing or unmapped values remain unknown. |
+| `espoo_buildings` | [Dataset catalogue](https://hri.fi/data/fi/dataset/espoon-rakennukset), [Espoo WFS](https://kartat.espoo.fi/teklaogcweb/wfs.ashx), [WFS documentation](https://kartat.espoo.fi/Paikkatieto/files/WMS-ja_WFS-rajapintakuvaukset.pdf) | Join by `PYSYVARAKENNUSTUNNUS`; map `KAYTTOTARKOITUS_KOODI` classes 0110, 0111, 0112, 0120, and 0121 only. |
 | `helsinki_active_plans` | [Dataset catalogue](https://avoindata.suomi.fi/data/fi/dataset/helsingin-kaupungin-ajantasa-asemakaava), [Helsinki WFS](https://kartta.hel.fi/ws/geoserver/avoindata/wfs) | Use `Kaavahakemisto_alue_kaava_vireilla` and preserve its active-plan status as an area fact, not a development forecast. |
 | `helsinki_parcels` | [Dataset and field documentation](https://hri.fi/data/fi/dataset/helsingin-kiinteistot-alueina), [Helsinki WFS](https://kartta.hel.fi/ws/geoserver/avoindata/wfs), [Helsinki WMS](https://kartta.hel.fi/ws/geoserver/avoindata/wms), [published WFS layer list](https://kartta.hel.fi/avoindata/dokumentit/Aineistolista_wfs_avoindata.html) | WFS layer `Kiinteisto_alue` supplies parcel geometry and identifiers, not owner or tenure. |
 | `vantaa_property_map` | [Vantaa WFS GetCapabilities](https://gis.vantaa.fi/geoserver/wfs?request=getCapabilities), [Vantaa WMS GetCapabilities](https://gis.vantaa.fi/geoserver/wms?request=GetCapabilities), [interface documentation](https://gis.vantaa.fi/rajapinnat/), [map view](https://kartta.vantaa.fi/link/76pfBf) | WFS/WMS layer `gis:kiinteistokartta`. Validate the `taso`/`teksti` encoding and isolate lease-area features; do not treat every property boundary as tenure evidence. |
@@ -247,7 +249,7 @@ Finnish UI labels are **kaupunki**, **muu omistaja**, and **ei tietoa**. This re
 
 Helsinki values come from the local `building_ownership.csv` classification joined by building ID. Its rental details are derived from [Helsinki's public decision portal](https://paatokset.hel.fi/fi/). `kaupunki` is direct derived city evidence; `muu omistaja` is the maintainer's residual class and is deliberately shown with low confidence. The raw CSV and decision documents stay local. A public release may include only its building-level derived class, its checksum, and complete public-source provenance.
 
-Espoo publishes `kaupunki` only where a licensed city-land polygon covers the complete building footprint. Absence from that polygon remains unknown, never `muu omistaja`. Vantaa and Kauniainen remain unknown until an admitted owner-class source is available.
+Espoo publishes `kaupunki` where a licensed city-land polygon covers the complete building footprint. A complete non-overlap is published as low-confidence `muu omistaja`: it means the building is not identified as Espoo-owned in the complete city-land dataset, not that the map is an authoritative title search. Partial footprint overlap remains unknown. Vantaa and Kauniainen remain unknown until an admitted owner-class source is available.
 
 Evidence precedence, highest first:
 
@@ -260,6 +262,7 @@ Rules:
 
 - A licensed municipality-owned polygon supports `land_owner_class=city` only for complete building-footprint coverage.
 - Helsinki's local classification can support `non_city` only with the derived-residual caveat and low confidence.
+- Espoo's complete non-overlap can support `non_city` only with the city-land residual caveat and low confidence.
 - Absence from any source remains unknown.
 - Private individuals or organizations are never named in the public artifact.
 - Conflicting positive evidence remains unresolved; the public builder must not choose silently.

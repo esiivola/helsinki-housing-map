@@ -48,7 +48,7 @@ layers:
     visualization_range: null
     methodology: Direct municipal Building Classification 2018 mapping where available; unmapped classes remain unknown.
     caveat_ids: [unmapped-codes-are-unknown]
-    source_ids: [helsinki_buildings, vantaa_buildings]
+    source_ids: [helsinki_buildings, espoo_buildings, vantaa_buildings]
   - layer_id: elevator
     finnish_label: Hissi
     description: Rakennusrekisteriin merkitty hissi.
@@ -142,7 +142,7 @@ layers:
     default_weight: 1
     visualization_scale: discrete
     visualization_range: null
-    methodology: Helsinki uses a local derived city-or-other-owner classification; Espoo uses full-footprint city-land evidence only.
+    methodology: Helsinki uses a local derived city-or-other-owner classification; Espoo uses full-footprint city-land evidence, with complete non-overlap published as a low-confidence other-owner residual.
     caveat_ids: [evidence-based-not-title-search, derived-owner-classification]
     source_ids: [espoo_city_land]
   - layer_id: noise_day_upper_db

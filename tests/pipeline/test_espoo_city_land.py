@@ -3,7 +3,7 @@ from pathlib import Path
 import geopandas as gpd
 from shapely.geometry import Polygon
 
-from pipeline.models import ValueState
+from pipeline.models import Confidence, ValueState
 from pipeline.sources.espoo_city_land import assign_city_owner_coverage, assign_city_owner_evidence, read_city_land_areas
 
 
@@ -35,7 +35,9 @@ def test_city_owner_evidence_requires_full_building_footprint_coverage() -> None
     assert values["city"].value == "city"
     assert values["partial"].state is ValueState.UNKNOWN
     assert values["partial"].value is None
-    assert values["other"].state is ValueState.UNKNOWN
+    assert values["other"].state is ValueState.KNOWN
+    assert values["other"].value == "non_city"
+    assert values["other"].confidence is Confidence.LOW
 
 
 def test_city_owner_coverage_preserves_partial_city_land_evidence() -> None:

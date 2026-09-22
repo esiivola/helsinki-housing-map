@@ -48,6 +48,22 @@ sources:
     redistribution_decision: allowed
     rationale: The published dataset is CC BY 4.0.
     schema_version: null
+  - source_id: espoo_buildings
+    name: Espoo buildings
+    source_url: https://kartat.espoo.fi/teklaogcweb/wfs.ashx
+    licence_url: https://creativecommons.org/licenses/by/4.0/
+    licence_id: CC-BY-4.0
+    attribution: Espoon kaupunki
+    retrieved_at: null
+    vintage: null
+    coverage: Espoo
+    checksum: null
+    processing_method: PYSYVARAKENNUSTUNNUS join with Building Classification 2018 mapping
+    caveats:
+      - Only classes 0110, 0111, 0112, 0120, and 0121 map to release-1 house types.
+    redistribution_decision: allowed
+    rationale: The published dataset is CC BY 4.0.
+    schema_version: null
   - source_id: espoo_city_land
     name: Espoo city land ownership
     source_url: https://hri.fi/data/dataset/espoon-kaupungin-maanomistus

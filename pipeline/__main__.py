@@ -57,6 +57,10 @@ def main() -> int:
     hsy_release.add_argument("--espoo-city-land-retrieved-at")
     hsy_release.add_argument("--espoo-city-land-vintage")
     hsy_release.add_argument("--espoo-city-land-checksum")
+    hsy_release.add_argument("--espoo-buildings-snapshot", type=Path)
+    hsy_release.add_argument("--espoo-buildings-retrieved-at")
+    hsy_release.add_argument("--espoo-buildings-vintage")
+    hsy_release.add_argument("--espoo-buildings-checksum")
     hsy_release.add_argument("--helsinki-building-ownership-snapshot", type=Path)
     hsy_release.add_argument("--helsinki-building-ownership-retrieved-at")
     hsy_release.add_argument("--helsinki-building-ownership-vintage")
@@ -135,6 +139,28 @@ def main() -> int:
             )
         elif any(espoo_city_land_provenance):
             parser.error("Espoo city-land provenance requires --espoo-city-land-snapshot")
+        espoo_buildings_source_manifest = None
+        espoo_buildings_provenance = (
+            arguments.espoo_buildings_retrieved_at,
+            arguments.espoo_buildings_vintage,
+            arguments.espoo_buildings_checksum,
+        )
+        if arguments.espoo_buildings_snapshot is not None:
+            if not all(espoo_buildings_provenance):
+                parser.error("--espoo-buildings-snapshot requires retrieved-at, vintage, and checksum")
+            espoo_buildings_source_manifest = SourceManifest(
+                source_id="espoo_buildings", name="Espoo buildings",
+                source_url="https://kartat.espoo.fi/teklaogcweb/wfs.ashx",
+                licence_url="https://creativecommons.org/licenses/by/4.0/", licence_id="CC-BY-4.0",
+                attribution="Espoon kaupunki", retrieved_at=arguments.espoo_buildings_retrieved_at,
+                vintage=arguments.espoo_buildings_vintage, coverage="Espoo",
+                checksum=arguments.espoo_buildings_checksum,
+                processing_method="PYSYVARAKENNUSTUNNUS join and Building Classification 2018 mapping",
+                caveats=("Only classes 0110, 0111, 0112, 0120, and 0121 map to release-1 house types.",),
+                redistribution_decision="allowed", rationale="The published dataset is CC BY 4.0.",
+            )
+        elif any(espoo_buildings_provenance):
+            parser.error("Espoo buildings provenance requires --espoo-buildings-snapshot")
         helsinki_building_ownership_source_manifest = None
         helsinki_building_ownership_provenance = (
             arguments.helsinki_building_ownership_retrieved_at,
@@ -295,6 +321,8 @@ def main() -> int:
             ),
             espoo_city_land_snapshot=arguments.espoo_city_land_snapshot,
             espoo_city_land_source_manifest=espoo_city_land_source_manifest,
+            espoo_buildings_snapshot=arguments.espoo_buildings_snapshot,
+            espoo_buildings_source_manifest=espoo_buildings_source_manifest,
             helsinki_building_ownership_snapshot=arguments.helsinki_building_ownership_snapshot,
             helsinki_building_ownership_source_manifest=helsinki_building_ownership_source_manifest,
             vantaa_buildings_snapshot=arguments.vantaa_buildings_snapshot,

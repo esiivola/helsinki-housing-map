@@ -45,6 +45,21 @@ Build the validated HSY release from its immutable local snapshot. The command w
   --helsinki-building-ownership-checksum sha256:...
 ```
 
+### House types
+
+Pass the municipal building snapshots to publish `Talotyyppi`. The builder joins Helsinki and Vantaa by `vtj_prt`, and Espoo by `PYSYVARAKENNUSTUNNUS`; it maps only classes 0110, 0111, 0112, 0120, and 0121. Kauniainen remains unknown until an admissible building-register source is available.
+
+```sh
+.venv/bin/python -m pipeline hsy-release data/raw/hsy_buildings_complete.geojson web/public/data \
+  --retrieved-at ... --vintage ... --checksum ... \
+  --helsinki-buildings-snapshot data/raw/helsinki_buildings_YYYY-MM-DD.geojson \
+  --helsinki-buildings-retrieved-at ... --helsinki-buildings-vintage YYYY-MM-DD --helsinki-buildings-checksum sha256:... \
+  --espoo-buildings-snapshot data/raw/espoo_buildings_YYYY-MM-DD.gml \
+  --espoo-buildings-retrieved-at ... --espoo-buildings-vintage YYYY-MM-DD --espoo-buildings-checksum sha256:... \
+  --vantaa-buildings-snapshot data/raw/vantaa_buildings_YYYY-MM-DD.geojson \
+  --vantaa-buildings-retrieved-at ... --vantaa-buildings-vintage YYYY-MM-DD --vantaa-buildings-checksum sha256:...
+```
+
 ### Education and wellbeing service snapshots
 
 Download the published Service Map units for the daycare and school groups:

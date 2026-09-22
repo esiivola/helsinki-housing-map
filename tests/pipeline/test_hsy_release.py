@@ -4,8 +4,10 @@ import json
 import gzip
 from pathlib import Path
 
+import geopandas as gpd
 import pyarrow as pa
 import pyarrow.parquet as pq
+from shapely.geometry import Point
 
 from pipeline.build import _workplace_layers, build_hsy_release, complete_workplace_transit_destinations, load_transit_batches, load_workplace_transit_batches
 from pipeline.export.web_bundle import _layer_distributions, _layer_value_data, _overview_summaries, _score_inputs, _visualization_breaks, linear_histogram
@@ -392,6 +394,29 @@ def test_hsy_release_exports_only_residential_buildings_and_year_evidence(tmp_pa
     assert audit["layer_value_state_counts_by_municipality_and_layer"]["Helsinki"]["noise_night_upper_db"]["partial"] == 1
 
 
+def test_hsy_release_exports_espoo_house_type_with_espoo_evidence(tmp_path: Path) -> None:
+    hsy_snapshot = tmp_path / "hsy-espoo.geojson"
+    hsy_snapshot.write_text(FIXTURE.read_text().replace('"kunta": "091"', '"kunta": "049"'))
+    espoo_snapshot = tmp_path / "espoo-buildings.geojson"
+    gpd.GeoDataFrame(
+        {"PYSYVARAKENNUSTUNNUS": ["fixture-1"], "KAYTTOTARKOITUS_KOODI": ["0112"]},
+        geometry=[Point(24.9, 60.1)], crs=4326,
+    ).to_file(espoo_snapshot, driver="GeoJSON")
+    build_hsy_release(
+        hsy_snapshot, tmp_path, _source_manifest(), PAAVO_FIXTURE, _paavo_source_manifest(), NOISE_FIXTURE,
+        _noise_source_manifest(), OSM_FIXTURE, _osm_source_manifest(), source_crs=4326,
+        espoo_buildings_snapshot=espoo_snapshot,
+        espoo_buildings_source_manifest=_espoo_buildings_source_manifest(),
+    )
+
+    attributes = json.loads(gzip.decompress((tmp_path / "attributes" / "Espoo.json.gz").read_bytes()))
+    house_type = next(value for value in attributes["building_values"] if value["layer_id"] == "house_type")
+
+    assert house_type["value"] == "rivitalo"
+    assert house_type["evidence_ids"] == ["espoo-building-class"]
+
+
+
 def test_hsy_release_requires_espoo_city_land_snapshot_and_provenance_together(tmp_path: Path) -> None:
     try:
         build_hsy_release(
@@ -476,6 +501,16 @@ def _helsinki_buildings_source_manifest() -> SourceManifest:
         licence_url="https://creativecommons.org/licenses/by/4.0/", licence_id="CC-BY-4.0", attribution="Helsingin kaupunki",
         retrieved_at="2026-08-30T12:00:00+03:00", vintage="2026-08-30", coverage="Helsinki", checksum="sha256:fixture",
         processing_method="VTJ-PRT join and Building Classification 2018 mapping", caveats=("fixture",), redistribution_decision="allowed", rationale="Open licence confirmed",
+    )
+
+
+def _espoo_buildings_source_manifest() -> SourceManifest:
+    return SourceManifest(
+        source_id="espoo_buildings", name="Espoo buildings", source_url="https://example.test/espoo-buildings",
+        licence_url="https://creativecommons.org/licenses/by/4.0/", licence_id="CC-BY-4.0",
+        attribution="Espoo", retrieved_at="2026-09-22T12:00:00+03:00", vintage="2026-09-22",
+        coverage="Espoo", checksum="sha256:fixture", processing_method="fixture",
+        caveats=("fixture",), redistribution_decision="allowed", rationale="fixture",
     )
 
 

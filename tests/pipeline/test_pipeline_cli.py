@@ -82,6 +82,20 @@ def test_hsy_release_rejects_espoo_city_land_snapshot_without_provenance(tmp_pat
     assert "--espoo-city-land-snapshot requires retrieved-at, vintage, and checksum" in result.stderr
 
 
+def test_hsy_release_rejects_espoo_buildings_snapshot_without_provenance(tmp_path: Path) -> None:
+    result = subprocess.run(
+        [
+            sys.executable, "-m", "pipeline", "hsy-release", str(HSY_FIXTURE_PATH), str(tmp_path / "bundle"),
+            "--retrieved-at", "2026-08-26T23:15:17+03:00", "--vintage", "2026-08-26", "--checksum", "sha256:fixture",
+            "--espoo-buildings-snapshot", str(tmp_path / "espoo-buildings.gml"),
+        ],
+        cwd=PROJECT_ROOT, capture_output=True, text=True,
+    )
+
+    assert result.returncode != 0
+    assert "--espoo-buildings-snapshot requires retrieved-at, vintage, and checksum" in result.stderr
+
+
 def test_hsy_release_rejects_helsinki_ownership_snapshot_without_complete_provenance(tmp_path: Path) -> None:
     snapshot = tmp_path / "building_ownership.csv"
     snapshot.write_text("building_id,luokka\nfixture-1,kaupunki\n")

@@ -1,5 +1,13 @@
 # Decisions and regression notes
 
+## 2026-09-22 — Espoo house-type integration fixture imports
+
+- Type: test regression fix
+- Symptom: the new Espoo house-type release test stopped with `NameError` before it called the builder.
+- Root cause: the test added a GeoPandas geometry fixture without importing GeoPandas and `Point`.
+- Fix: import the fixture dependencies and retain the integration test as the regression check.
+- Rule for next time: a test that constructs spatial fixtures imports its geometry dependencies explicitly at module scope.
+
 ## 2026-09-22 — repeated Helsinki ownership classifications
 
 - Type: data-ingestion regression fix

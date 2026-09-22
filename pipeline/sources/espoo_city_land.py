@@ -22,13 +22,15 @@ def assign_city_owner_evidence(
     values: dict[str, BuildingValue] = {}
     for building in buildings[["building_id", "geometry"]].itertuples(index=False):
         covered = building.geometry.intersection(city_land).area / building.geometry.area
+        fully_city_owned = covered >= 1 - 1e-9
+        outside_city_land = covered <= 1e-9
         values[building.building_id] = BuildingValue(
-            state=ValueState.KNOWN if covered >= 1 - 1e-9 else ValueState.UNKNOWN,
+            state=ValueState.KNOWN if fully_city_owned or outside_city_land else ValueState.UNKNOWN,
             kind=ValueKind.SCALAR,
-            value="city" if covered >= 1 - 1e-9 else None,
+            value="city" if fully_city_owned else "non_city" if outside_city_land else None,
             coverage=covered,
             method=ValueMethod.AGGREGATED,
-            confidence=Confidence.HIGH if covered >= 1 - 1e-9 else Confidence.LOW,
+            confidence=Confidence.HIGH if fully_city_owned else Confidence.LOW,
         )
     return values
 
