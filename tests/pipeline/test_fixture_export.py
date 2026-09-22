@@ -34,7 +34,7 @@ def test_fixture_build_exports_deterministic_static_artifacts(tmp_path: Path) ->
     assert json.loads(gzip.decompress((tmp_path / "first" / "geometry" / "Helsinki.geojson.gz").read_bytes()))["features"][0]["properties"] == {"building_id": "fixture-building-1"}
     assert json.loads((tmp_path / "first" / "audit.json").read_text()) == {
         "building_count_by_municipality": {"Helsinki": 4},
-        "evidence_count": 1,
+        "evidence_count": 2,
         "layer_value_state_counts": {"known": 3, "partial": 1, "unknown": 1},
         "layer_value_state_counts_by_municipality": {"Helsinki": {"known": 3, "partial": 1, "unknown": 1}},
         "layer_value_state_counts_by_layer": {"land_owner_class": {"known": 2}, "noise_day_upper_db": {"known": 1, "partial": 1, "unknown": 1}},

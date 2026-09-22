@@ -19,13 +19,13 @@ def test_registry_loads_finnish_layer_metadata_and_technical_identifiers() -> No
     assert registry["building_year"].finnish_label == "Rakennusvuosi"
     assert registry["building_year"].kind is LayerKind.NUMERIC
     assert registry["building_year"].visualization_range == (1600, 2100)
-    assert registry["plot_tenure"].allowed_categories == ("owned", "leased", "mixed")
-    assert registry["plot_tenure"].source_ids == ("espoo_city_land",)
+    assert registry["land_owner_class"].allowed_categories == ("city", "non_city")
+    assert registry["land_owner_class"].source_ids == ("espoo_city_land",)
 
 
 def test_registry_rejects_unknown_as_an_accepted_category(tmp_path: Path) -> None:
     invalid = tmp_path / "invalid.yaml"
-    invalid.write_text(FIXTURE_PATH.read_text().replace("      - owned", "      - unknown"))
+    invalid.write_text(FIXTURE_PATH.read_text().replace("      - city", "      - unknown"))
 
     with pytest.raises(ValueError, match="unknown cannot be accepted"):
         load_layer_registry(invalid)
@@ -56,7 +56,7 @@ def test_project_layer_registry_uses_finnish_labels_and_known_categories() -> No
     assert registry["noise_day_upper_db"].finnish_label == "Päivämelun yläraja"
     assert registry["noise_night_upper_db"].finnish_label == "Yömelun yläraja"
     assert registry["heating_energy_source"].allowed_categories[-1] == "other"
-    assert registry["plot_tenure"].allowed_categories == ("owned", "leased", "mixed")
+    assert registry["land_owner_class"].allowed_categories == ("city", "non_city")
     assert set(registry) == {
         "building_year",
         "house_type",
@@ -65,7 +65,6 @@ def test_project_layer_registry_uses_finnish_labels_and_known_categories() -> No
         "heating_energy_source",
         "storey_count",
         "dwelling_count",
-        "plot_tenure",
         "land_owner_class",
         "noise_day_upper_db",
         "noise_night_upper_db",

@@ -14,7 +14,6 @@ from pipeline.models import (
 
 
 CLAIMS_BY_LAYER = {
-    "plot_tenure": {LandClaim.OWNED, LandClaim.LEASED},
     "land_owner_class": {LandClaim.CITY, LandClaim.NON_CITY},
 }
 

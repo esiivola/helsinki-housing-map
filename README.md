@@ -32,6 +32,19 @@ Build the validated HSY release from its immutable local snapshot. The command w
   --checksum sha256:9b7e3fb33bd162d9036d68be83b74a7162134ea7c10a0e64055ea83bf9c31c44
 ```
 
+### Helsinki owner classification
+
+`data/building_ownership.csv` is a local input and is never copied to `web/public`. Its Helsinki rental details are derived from [Helsinki's public decision portal](https://paatokset.hel.fi/fi/). The builder refuses the snapshot if its retrieval timestamp, vintage, or checksum is missing; it publishes only `kaupunki` or `muu omistaja` per building, the decision-portal attribution, and the residual-class caveat.
+
+```sh
+.venv/bin/python -m pipeline hsy-release data/raw/hsy_buildings_complete.geojson web/public/data \
+  --retrieved-at ... --vintage ... --checksum ... \
+  --helsinki-building-ownership-snapshot data/building_ownership.csv \
+  --helsinki-building-ownership-retrieved-at ... \
+  --helsinki-building-ownership-vintage ... \
+  --helsinki-building-ownership-checksum sha256:...
+```
+
 ### Education and wellbeing service snapshots
 
 Download the published Service Map units for the daycare and school groups:

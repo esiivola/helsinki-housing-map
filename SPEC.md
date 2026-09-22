@@ -84,8 +84,7 @@ The app does not provide separate investor and resident modes in release 1.
 | `heating_energy_source` | Lämmitysenergian lähde | categorical | Canonical main heating-energy-source value | Helsinki building-register code mapping; unmapped codes remain unknown |
 | `storey_count` | Kerrosluku | numeric | Registered building storey count | Helsinki building register only |
 | `dwelling_count` | Asuinhuoneistojen määrä | numeric | Registered count of dwellings | Helsinki building register only |
-| `plot_tenure` | Tontin hallintamuoto | categorical | `owned`, `leased`, `mixed`, or `unknown` | Positive municipal and decision evidence only; see Section 7 |
-| `land_owner_class` | Maanomistajaluokka | categorical | `city`, `non_city`, `mixed`, or `unknown` | Positive licensed municipal evidence only; see Section 7 |
+| `land_owner_class` | Maanomistus | categorical | `city`, `non_city`, or `unknown` | Helsinki: local derived city-or-other classification. Espoo: positive full-footprint city-land evidence. See Section 7. |
 | `noise_day_upper_db` | Päivämelun vyöhykkeen yläraja | numeric | Highest published upper dB bound among compatible daytime noise zones intersecting the footprint | Current municipality-specific strategic noise data where validated; documented fallback only. This is a conservative zone bound, not a building-level maximum. |
 | `noise_night_upper_db` | Yömelun vyöhykkeen yläraja | numeric | Highest published upper dB bound among Helsinki `LAeq,22-7` zones intersecting the footprint | Helsinki 2022 national noise model at two-metre calculation height. This is a conservative zone bound, not a building-level maximum. |
 | `active_planning_area` | Vireillä olevalla asemakaava-alueella | categorical | `yes` if the building footprint intersects a published active detailed-plan area, otherwise `no` | Helsinki active detailed-plan index only. It does not predict construction timing, scale, or disturbance. |
@@ -242,39 +241,28 @@ Non-admitted inputs, and all raw, extracted, and derived artifacts from them, ar
 
 ### 7.3 Land evidence model
 
-The two land layers are deliberately separate:
+The public map has one land layer: `land_owner_class`, with `city`, `non_city`, or `unknown`.
 
-1. `plot_tenure`: `owned`, `leased`, `mixed`, `unknown`.
-2. `land_owner_class`: `city`, `non_city`, `mixed`, `unknown`.
+Finnish UI labels are **kaupunki**, **muu omistaja**, and **ei tietoa**. This reports a source-backed owner class; it does not report plot tenure, lease status, cadastral title, or a natural-person owner.
 
-These concepts are not interchangeable. City ownership does not itself prove that a resident's housing company leases the plot, and a leased plot need not be city-owned.
+Helsinki values come from the local `building_ownership.csv` classification joined by building ID. Its rental details are derived from [Helsinki's public decision portal](https://paatokset.hel.fi/fi/). `kaupunki` is direct derived city evidence; `muu omistaja` is the maintainer's residual class and is deliberately shown with low confidence. The raw CSV and decision documents stay local. A public release may include only its building-level derived class, its checksum, and complete public-source provenance.
 
-Finnish UI labels are:
-
-- tenure: **oma tontti**, **vuokratontti**, **useita hallintamuotoja**, **ei tietoa**;
-- owner class: **kaupungin omistama maa**, **muun kuin kaupungin omistama maa**, **useita omistajaluokkia**, **ei tietoa**.
-
-Here “oma tontti” means that positive evidence says the relevant housing/building entity owns the land; it does not mean that an individual apartment shareholder personally owns a parcel. “Kaupunki” means the municipality relevant to the location, not only the City of Helsinki. `non_city` can include the state, a parish, a company, an association, or a private party, but the public data does not identify natural persons.
-
-The inspector may compose a plain-language summary from the two independent results—such as **kaupungin vuokratontti** or **muun kuin kaupungin vuokratontti**—only when both component values are known. This summary is presentation, not a third stored or scored layer. It must never turn an unknown component into a definite combined class.
+Espoo publishes `kaupunki` only where a licensed city-land polygon covers the complete building footprint. Absence from that polygon remains unknown, never `muu omistaja`. Vantaa and Kauniainen remain unknown until an admitted owner-class source is available.
 
 Evidence precedence, highest first:
 
-1. **Direct official statement:** a licensed/open record explicitly identifies the plot's tenure or owner class.
+1. **Direct official statement:** a licensed/open record explicitly identifies the owner class.
 2. **Official spatial overlay:** a licensed municipal polygon unambiguously intersects the relevant parcel/building.
-3. **Documented inference:** for example, an official decision identifies the City of Helsinki as ground lessor for the identified property.
+3. **Documented derivation:** a maintained building-ID classification with auditable public-source provenance.
 4. **No evidence:** unknown.
 
 Rules:
 
-- A documented City of Helsinki ground lessor supports both `plot_tenure=leased` and `land_owner_class=city`, tagged `derived` with its evidence URL.
-- An official municipality-owned polygon supports `land_owner_class=city`; it supports `plot_tenure=leased` only if a separate lease indicator applies.
-- A Vantaa lease-area polygon supports `plot_tenure=leased`; it supports owner class only if the source also states the owner class.
-- Absence from a city-owned or lease dataset never supports `owned` or `non_city`.
-- `non_city` requires positive evidence that the owner is not a municipality; private individuals or organizations are never named in the public artifact.
-- `owned` requires positive evidence that the building/housing entity owns the plot; absence of a lease is insufficient.
-- Conflicting positive evidence produces `mixed` or an unresolved conflict, never silent precedence. The inspector lists the records.
-- Kauniainen values remain unknown until a source passes the admission gate.
+- A licensed municipality-owned polygon supports `land_owner_class=city` only for complete building-footprint coverage.
+- Helsinki's local classification can support `non_city` only with the derived-residual caveat and low confidence.
+- Absence from any source remains unknown.
+- Private individuals or organizations are never named in the public artifact.
+- Conflicting positive evidence remains unresolved; the public builder must not choose silently.
 
 ## 8. Canonical spatial and value model
 
@@ -709,7 +697,7 @@ Keep each task independently verifiable and avoid redesigning the core for each 
 2. Build HSY building ingestion, residential classification, house type, building year, tiles, and compact attribute export.
 3. Implement pure frontend loading, generic controls, binary scoring, missing policy, overall/individual styling, inspector, and persistence against the fixture.
 4. Implement common numeric/categorical spatial aggregation and noise.
-5. Implement the two land layers municipality by municipality with evidence tests and public-field allowlisting.
+5. Implement the owner-class layer municipality by municipality with evidence tests and public-field allowlisting.
 6. Implement OSM/HSY environmental and service destinations plus walking/cycling routing.
 7. Implement HSL transit sampling and failure reporting.
 8. Implement Paavo income and suppression handling.
@@ -729,7 +717,7 @@ The release is proven to work only when `scripts/verify_e2e.sh` (or an equivalen
 6. Configures building year to 1960–1980 and confirms the `[1940, 1970]` building passes by the documented any-match rule.
 7. Sets the daytime-noise zone upper bound as a dealbreaker, confirms a known failing building becomes ineligible, and confirms the inspector names noise as the cause.
 8. Toggles missing-dealbreaker policy from pass to fail and confirms the partially missing fixture building changes eligibility while retaining its missing warning.
-9. Selects `land_owner_class`, confirms the mixed building has the categorical mixed style, and confirms the inspector reports its exact area proportions and evidence.
+9. Selects `land_owner_class`, confirms city and other-owner categories have distinct styles, and confirms the inspector reports the value, confidence, and evidence.
 10. Changes two non-dealbreaker weights and confirms the displayed combined score equals the independently calculated expected weighted mean.
 11. Switches to an individual numeric layer and verifies raw-value legend and caveat access.
 12. Clicks open ground and verifies no suitability score is claimed.

@@ -66,8 +66,6 @@ def build_hsy_release(
     paavo_source_manifest: SourceManifest,
     noise_snapshot: Path,
     noise_source_manifest: SourceManifest,
-    vantaa_property_snapshot: Path,
-    vantaa_property_source_manifest: SourceManifest,
     osm_snapshot: Path,
     osm_source_manifest: SourceManifest,
     helsinki_buildings_snapshot: Path | None = None,
@@ -82,6 +80,8 @@ def build_hsy_release(
     active_plans_source_manifest: SourceManifest | None = None,
     espoo_city_land_snapshot: Path | None = None,
     espoo_city_land_source_manifest: SourceManifest | None = None,
+    helsinki_building_ownership_snapshot: Path | None = None,
+    helsinki_building_ownership_source_manifest: SourceManifest | None = None,
     vantaa_buildings_snapshot: Path | None = None,
     vantaa_buildings_source_manifest: SourceManifest | None = None,
     main_cycle_network_snapshot: Path | None = None,
@@ -100,7 +100,6 @@ def build_hsy_release(
     from pipeline.sources.helsinki_buildings import building_facts_by_vtj, house_types_by_vtj, read_helsinki_buildings
     from pipeline.sources.paavo import assign_income_by_point
     from pipeline.sources.noise import assign_noise_upper_by_intersection, read_noise_zones
-    from pipeline.sources.vantaa_property_map import assign_lease_evidence, read_lease_areas
     from pipeline.sources.osm import GROCERY_STORE_GROUPS, HEALTH_PROVIDER_GROUPS, assign_sparse_route_distances, extract_basemap, extract_destinations, extract_pedestrian_sparse_graph
     from pipeline.sources.cycling_quality import assign_cycling_metrics, build_cycling_network
     from pipeline.sources.ptv import HEALTH_SERVICE_GROUPS, extract_health_destinations
@@ -109,7 +108,6 @@ def build_hsy_release(
     validate_source_manifest(source_manifest)
     validate_source_manifest(paavo_source_manifest)
     validate_source_manifest(noise_source_manifest)
-    validate_source_manifest(vantaa_property_source_manifest)
     validate_source_manifest(osm_source_manifest)
     if (night_noise_snapshot is None) != (night_noise_source_manifest is None):
         raise ValueError("Night-noise snapshot and source manifest must be provided together")
@@ -123,6 +121,10 @@ def build_hsy_release(
         raise ValueError("Espoo city-land snapshot and source manifest must be provided together")
     if espoo_city_land_source_manifest is not None:
         validate_source_manifest(espoo_city_land_source_manifest)
+    if (helsinki_building_ownership_snapshot is None) != (helsinki_building_ownership_source_manifest is None):
+        raise ValueError("Helsinki building ownership snapshot and source manifest must be provided together")
+    if helsinki_building_ownership_source_manifest is not None:
+        validate_source_manifest(helsinki_building_ownership_source_manifest)
     if (vantaa_buildings_snapshot is None) != (vantaa_buildings_source_manifest is None):
         raise ValueError("Vantaa buildings snapshot and source manifest must be provided together")
     if vantaa_buildings_source_manifest is not None:
@@ -180,13 +182,17 @@ def build_hsy_release(
     # not as a per-building scoreable layer, so we keep the polygons but no longer
     # assign a per-building in-plan-area status.
     active_plan_areas = read_active_plan_areas(active_plans_snapshot).to_crs(3067) if active_plans_snapshot is not None else None
-    vantaa_buildings = scored_buildings.loc[scored_buildings["kunta"] == "092"].to_crs(3067)
-    lease_by_building = assign_lease_evidence(vantaa_buildings, read_lease_areas(vantaa_property_snapshot).to_crs(3067))
     from pipeline.sources.espoo_city_land import assign_city_owner_evidence, read_city_land_areas
     espoo_buildings = scored_buildings.loc[scored_buildings["kunta"] == "049"].to_crs(3067)
     city_owner_by_building = (
         assign_city_owner_evidence(espoo_buildings, read_city_land_areas(espoo_city_land_snapshot).to_crs(3067))
         if espoo_city_land_snapshot is not None
+        else {}
+    )
+    from pipeline.sources.helsinki_building_ownership import read_building_ownership
+    helsinki_owner_by_building = (
+        read_building_ownership(helsinki_building_ownership_snapshot)
+        if helsinki_building_ownership_snapshot is not None
         else {}
     )
     osm_nodes, osm_coordinates, osm_graph = extract_pedestrian_sparse_graph(osm_snapshot)
@@ -349,12 +355,20 @@ def build_hsy_release(
         if active_plans_source_manifest is not None
         else None
     )
-    lease_evidence = EvidenceRecord(
-        evidence_id="vantaa-lease-area", source_id=vantaa_property_source_manifest.source_id,
-        source_url=vantaa_property_source_manifest.source_url,
-        retrieved_at=vantaa_property_source_manifest.retrieved_at, vintage=vantaa_property_source_manifest.vintage,
-        claim="positive lease-area evidence", method=ValueMethod.AGGREGATED,
-        confidence=Confidence.MEDIUM, caveat_ids=("evidence-based-not-title-search",),
+    helsinki_owner_evidence = (
+        EvidenceRecord(
+            evidence_id="helsinki-building-ownership",
+            source_id=helsinki_building_ownership_source_manifest.source_id,
+            source_url=helsinki_building_ownership_source_manifest.source_url,
+            retrieved_at=helsinki_building_ownership_source_manifest.retrieved_at,
+            vintage=helsinki_building_ownership_source_manifest.vintage,
+            claim="derived Helsinki city-or-other land-owner classification",
+            method=ValueMethod.DERIVED,
+            confidence=Confidence.MEDIUM,
+            caveat_ids=("evidence-based-not-title-search", "derived-owner-classification"),
+        )
+        if helsinki_building_ownership_source_manifest is not None
+        else None
     )
     city_owner_evidence = (
         EvidenceRecord(
@@ -375,6 +389,12 @@ def build_hsy_release(
     service_map_evidence = EvidenceRecord("service-map-education-destination", service_map_source_manifest.source_id, service_map_source_manifest.source_url, service_map_source_manifest.retrieved_at, service_map_source_manifest.vintage, "published education and daycare service location", ValueMethod.DIRECT, Confidence.HIGH, ("service-category-classification",)) if service_map_source_manifest else None
     ptv_health_evidence = EvidenceRecord("ptv-healthcare-destination", ptv_health_source_manifest.source_id, ptv_health_source_manifest.source_url, ptv_health_source_manifest.retrieved_at, ptv_health_source_manifest.vintage, "published healthcare service location", ValueMethod.DIRECT, Confidence.MEDIUM, ("voluntary-private-provider-coverage", "service-category-classification")) if ptv_health_source_manifest else None
     layers = load_layer_registry(Path(__file__).parent / "config" / "layers.yaml")
+    if helsinki_building_ownership_source_manifest is not None:
+        owner_layer = layers["land_owner_class"]
+        layers["land_owner_class"] = replace(
+            owner_layer,
+            source_ids=(*owner_layer.source_ids, helsinki_building_ownership_source_manifest.source_id),
+        )
     layers.update(_workplace_layers(workplace_destinations, ready_workplace_destination_ids))
     if green_cover_source_manifest:
         layers["green_cover_300m_pct"] = _environment_layer("green_cover_300m_pct", "Vihreän peitteen osuus 300 metrin säteellä", "%", (0, 100), "Vegetated land-cover area within a 300 m radius.", "Offline intersection of HSY 2024 vegetation classes with a 300 m point buffer.", ("land-cover-resolution",), (green_cover_source_manifest.source_id,))
@@ -448,7 +468,7 @@ def build_hsy_release(
                     ),
                 )
                 for layer_id, layer in layers.items()
-                if layer_id not in {"building_year", "house_type", "elevator", "heating_method", "heating_energy_source", "storey_count", "dwelling_count", "income_median_eur", "noise_day_upper_db", "noise_night_upper_db", "plot_tenure", "land_owner_class", *grocery_store_layer_ids, *education_layer_ids, *health_layer_ids, "forest_walk_m", "shore_walk_m", "daycare_walk_m", "school_walk_m", "healthcare_walk_m", "library_walk_m"} and not layer_id.startswith(("bike_workplace_", "transit_workplace_"))
+                if layer_id not in {"building_year", "house_type", "elevator", "heating_method", "heating_energy_source", "storey_count", "dwelling_count", "income_median_eur", "noise_day_upper_db", "noise_night_upper_db", "land_owner_class", *grocery_store_layer_ids, *education_layer_ids, *health_layer_ids, "forest_walk_m", "shore_walk_m", "daycare_walk_m", "school_walk_m", "healthcare_walk_m", "library_walk_m"} and not layer_id.startswith(("bike_workplace_", "transit_workplace_"))
             ),
             LayerValueRecord(
                 building_id=building.building_id,
@@ -464,13 +484,11 @@ def build_hsy_release(
             *(LayerValueRecord(building.building_id, f"transit_workplace_{destination['id']}_median_boarding", _with_evidence(workplace_transit_values[destination["id"]]["median_boarding"][building.building_id], transit_evidence.evidence_id)) for destination in workplace_destinations if destination["id"] in ready_workplace_destination_ids),
             *((LayerValueRecord(building.building_id, "transit_workplace_median_first_boarding_walk_m", _with_evidence(workplace_transit_values["_all"]["median_first_boarding_walk_m"][building.building_id], transit_evidence.evidence_id)),) if {str(destination["id"]) for destination in workplace_destinations}.issubset(ready_workplace_destination_ids) else ()),
             LayerValueRecord(
-                building_id=building.building_id, layer_id="plot_tenure",
-                value=_with_evidence(lease_by_building.get(building.building_id, BuildingValue(ValueState.UNKNOWN, ValueKind.DISTRIBUTION, None)), lease_evidence.evidence_id),
-            ),
-            LayerValueRecord(
                 building_id=building.building_id,
                 layer_id="land_owner_class",
-                value=_with_evidence(city_owner_by_building[building.building_id], city_owner_evidence.evidence_id)
+                value=_with_evidence(helsinki_owner_by_building[building.building_id], helsinki_owner_evidence.evidence_id)
+                if building.building_id in helsinki_owner_by_building and helsinki_owner_evidence
+                else _with_evidence(city_owner_by_building[building.building_id], city_owner_evidence.evidence_id)
                 if building.building_id in city_owner_by_building and city_owner_evidence
                 else BuildingValue(ValueState.UNKNOWN, ValueKind.SCALAR, None, method=ValueMethod.AGGREGATED, confidence=Confidence.LOW),
             ),
@@ -498,7 +516,7 @@ def build_hsy_release(
             ),
         )
     )
-    sources = tuple(source for source in (source_manifest, paavo_source_manifest, noise_source_manifest, night_noise_source_manifest, active_plans_source_manifest, vantaa_property_source_manifest, vantaa_buildings_source_manifest, espoo_city_land_source_manifest, osm_source_manifest, helsinki_buildings_source_manifest, gtfs_source_manifest, main_cycle_network_source_manifest, green_cover_source_manifest, service_map_source_manifest, ptv_health_source_manifest) if source is not None)
+    sources = tuple(source for source in (source_manifest, paavo_source_manifest, noise_source_manifest, night_noise_source_manifest, active_plans_source_manifest, vantaa_buildings_source_manifest, espoo_city_land_source_manifest, helsinki_building_ownership_source_manifest, osm_source_manifest, helsinki_buildings_source_manifest, gtfs_source_manifest, main_cycle_network_source_manifest, green_cover_source_manifest, service_map_source_manifest, ptv_health_source_manifest) if source is not None)
     published_source_ids = {source.source_id for source in sources}
     layers = {
         layer_id: replace(layer, source_ids=tuple(source_id for source_id in layer.source_ids if source_id in published_source_ids))
@@ -507,7 +525,7 @@ def build_hsy_release(
     release = ReleaseArtifact(
         schema_version="1.0.0",
         sources=sources,
-        evidence=tuple(item for item in (evidence, helsinki_house_type_evidence, vantaa_house_type_evidence, helsinki_building_facts_evidence, paavo_evidence, noise_evidence, night_noise_evidence, active_plans_evidence, lease_evidence, city_owner_evidence, osm_evidence, transit_evidence, green_cover_evidence, main_cycle_network_evidence, service_map_evidence, ptv_health_evidence) if item is not None),
+        evidence=tuple(item for item in (evidence, helsinki_house_type_evidence, vantaa_house_type_evidence, helsinki_building_facts_evidence, paavo_evidence, noise_evidence, night_noise_evidence, active_plans_evidence, helsinki_owner_evidence, city_owner_evidence, osm_evidence, transit_evidence, green_cover_evidence, main_cycle_network_evidence, service_map_evidence, ptv_health_evidence) if item is not None),
         buildings=buildings,
         layer_values=values,
     )

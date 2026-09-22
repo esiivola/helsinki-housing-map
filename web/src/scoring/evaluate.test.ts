@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { evaluateBuilding, evaluateBuildingGroups, evaluateCriterionGroup, evaluateLayer, linearPreferenceScore } from "./evaluate";
 
 const numeric = { id: "building_year", kind: "numeric" } as const;
-const categorical = { id: "plot_tenure", kind: "categorical" } as const;
+const categorical = { id: "land_owner_class", kind: "categorical" } as const;
 
 describe("evaluateLayer", () => {
   it("scores a lower-is-better preference linearly between its visible endpoints", () => {
@@ -63,19 +63,19 @@ describe("evaluateLayer", () => {
     ).toMatchObject({ status: "fail", score: 0 });
   });
 
-  it("accepts mixed only when the category is explicitly selected", () => {
+  it("accepts an owner class only when the category is explicitly selected", () => {
     expect(
       evaluateLayer(
-        { state: "known", value: "mixed" },
+        { state: "known", value: "non_city" },
         categorical,
-        { enabled: true, acceptedCategories: ["mixed"] },
+        { enabled: true, acceptedCategories: ["non_city"] },
       ),
     ).toMatchObject({ status: "pass", score: 1 });
     expect(
       evaluateLayer(
-        { state: "known", value: "mixed" },
+        { state: "known", value: "non_city" },
         categorical,
-        { enabled: true, acceptedCategories: ["leased"] },
+        { enabled: true, acceptedCategories: ["city"] },
       ),
     ).toMatchObject({ status: "fail", score: 0 });
   });

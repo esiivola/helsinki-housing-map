@@ -1,5 +1,13 @@
 # Decisions and regression notes
 
+## 2026-09-22 — repeated Helsinki ownership classifications
+
+- Type: data-ingestion regression fix
+- Symptom: the public release stopped when `building_ownership.csv` contained repeated building IDs.
+- Root cause: seven repeated IDs had the same classification, but the reader rejected every duplicate before comparing its value.
+- Fix: retain identical repeated classifications and reject only conflicting classes. Guarded by `tests/pipeline/test_helsinki_building_ownership.py`.
+- Rule for next time: a repeated local classification is safe only when every repeated value agrees; never pick a conflicting value by input order.
+
 ## 2026-09-21 — no-layer keyboard inspection
 
 - Type: browser-test regression fix

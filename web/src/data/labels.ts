@@ -33,6 +33,7 @@ const caveats: Record<string, string> = {
   "accessibility-evidence": "Rannan saavutettavuus perustuu reitti- ja käyttöoikeusnäyttöön.",
   "configured-cycling-speed": "Pyöräilyaika perustuu asetettuun keskinopeuteen.",
   "evidence-based-not-title-search": "Tulos perustuu myönteiseen lähdenäyttöön, ei viralliseen omistusoikeusselvitykseen.",
+  "derived-owner-classification": "Muu omistaja on johdettu jäännösluokka, ei kiinteistörekisterin omistajatieto.",
   "failed-samples-visible": "Epäonnistuneet reittinäytteet säilyvät osittaisena tietona.",
   "helsinki-only-building-register": "Rakennusrekisteritieto on saatavilla vain Helsingistä.",
   "helsinki-only-noise": "Yömelumalli on saatavilla vain Helsingistä.",
@@ -109,8 +110,7 @@ const methodologies: Record<string, string> = {
   "Offline postal-area assignment; suppressed source values are unknown.": "Postinumeroalueen määritys; salatut lähdearvot ovat tuntemattomia.",
   "Offline sampled HSL routing; minimi, mediaani ja maksimi ovat lähtöaikojen yhteenvetoja.": "Otospohjainen HSL-reititys; minimi, mediaani ja maksimi ovat lähtöaikojen yhteenvetoja.",
   "Offline straight-line distance from building representative point to the published route network.": "Linnuntie-etäisyys rakennuksen edustavasta pisteestä julkaistuun reittiverkkoon.",
-  "Positive land evidence only.": "Perustuu vain myönteiseen maankäyttönäyttöön.",
-  "Positive licensed land-owner evidence only; absent or partial evidence is unknown.": "Vain myönteinen lisensoitu maanomistajanäyttö; puuttuva tai osittainen näyttö on tuntematon.",
+  "Helsinki uses a local derived city-or-other-owner classification; Espoo uses full-footprint city-land evidence only.": "Helsingissä käytetään paikallista johdettua kaupunki–muu omistaja -luokitusta; Espoossa vain koko rakennuksen kattavaa kaupungin maan näyttöä.",
 };
 
 export function finnishLicence(value: string): string {

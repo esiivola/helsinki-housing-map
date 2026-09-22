@@ -34,6 +34,23 @@
       "redistribution_decision": "allowed",
       "rationale": "Open licence confirmed",
       "schema_version": "2026-08"
+    },
+    {
+      "source_id": "helsinki_building_ownership",
+      "name": "Helsinki building ownership classification",
+      "source_url": "https://example.test/helsinki-ownership",
+      "licence_url": "https://example.test/licence",
+      "licence_id": "derived",
+      "attribution": "Fixture",
+      "retrieved_at": "2026-09-22T10:00:00+00:00",
+      "vintage": "2026-09-22",
+      "coverage": "Helsinki",
+      "checksum": "sha256:derived",
+      "processing_method": "fixture classification",
+      "caveats": ["derived residual class"],
+      "redistribution_decision": "derived_only",
+      "rationale": "Only derived values are published.",
+      "schema_version": "2026-09"
     }
   ],
   "evidence": [
@@ -47,6 +64,17 @@
       "method": "direct",
       "confidence": "high",
       "caveat_ids": []
+    },
+    {
+      "evidence_id": "evidence-2",
+      "source_id": "helsinki_building_ownership",
+      "source_url": "https://example.test/helsinki-ownership",
+      "retrieved_at": "2026-09-22T10:00:00+00:00",
+      "vintage": "2026-09-22",
+      "claim": "derived other-owner classification",
+      "method": "derived",
+      "confidence": "low",
+      "caveat_ids": ["derived-owner-classification"]
     }
   ],
   "buildings": [
@@ -67,7 +95,7 @@
       "source_id": "hsy_buildings", "source_record_id": "fixture-record-3", "national_building_id": "fixture-building-partial", "municipality": "Helsinki", "completed": true, "residential_use": true, "house_type_code": "kerrostalo", "construction_years": [1970]
     },
     {
-      "source_id": "hsy_buildings", "source_record_id": "fixture-record-4", "national_building_id": "fixture-building-mixed", "municipality": "Helsinki", "completed": true, "residential_use": true, "house_type_code": "kerrostalo", "construction_years": [1970]
+      "source_id": "hsy_buildings", "source_record_id": "fixture-record-4", "national_building_id": "fixture-building-non-city", "municipality": "Helsinki", "completed": true, "residential_use": true, "house_type_code": "kerrostalo", "construction_years": [1970]
     }
   ],
   "layer_values": [
@@ -100,7 +128,7 @@
       "building_id": "fixture-building-partial", "layer_id": "noise_day_upper_db", "state": "partial", "kind": "scalar", "value": 50, "coverage": 0.7, "evidence_ids": ["evidence-1"], "method": "aggregated", "confidence": "medium"
     },
     {
-      "building_id": "fixture-building-mixed", "layer_id": "land_owner_class", "state": "known", "kind": "distribution", "value": "mixed", "distribution": {"city": 0.6, "non_city": 0.4}, "coverage": 1, "evidence_ids": ["evidence-1"], "method": "aggregated", "confidence": "high"
+      "building_id": "fixture-building-non-city", "layer_id": "land_owner_class", "state": "known", "kind": "scalar", "value": "non_city", "coverage": 1, "evidence_ids": ["evidence-2"], "method": "derived", "confidence": "low"
     }
   ]
 }

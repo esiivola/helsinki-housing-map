@@ -60,7 +60,7 @@ export function layerGroupFor(layerId: string): LayerGroup {
   if (layerId.startsWith("transit_workplace_") || layerId.startsWith("bike_workplace_") || layerId === "helsinki_main_cycle_route_access_m") return "Liikkuminen";
   if (layerId === "selected_grocery_walk_m" || layerId === "selected_education_service_walk_m" || layerId === "selected_health_service_walk_m" || layerId === "library_walk_m") return "Lähipalvelut";
   if (["forest_walk_m", "green_cover_300m_pct", "noise_day_upper_db", "noise_night_upper_db", "shore_walk_m"].includes(layerId)) return "Ympäristö";
-  if (["building_year", "dwelling_count", "elevator", "heating_energy_source", "heating_method", "house_type", "plot_tenure", "storey_count"].includes(layerId)) return "Asuminen ja rakennus";
+  if (["building_year", "dwelling_count", "elevator", "heating_energy_source", "heating_method", "house_type", "land_owner_class", "storey_count"].includes(layerId)) return "Asuminen ja rakennus";
   return "Aluetiedot";
 }
 

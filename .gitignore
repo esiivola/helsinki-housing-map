@@ -3,6 +3,7 @@
 /.venv/
 /.pytest_cache/
 /.DS_Store
+/data/.DS_Store
 __pycache__/
 *.py[cod]
 /data/raw/
@@ -11,10 +12,12 @@ __pycache__/
 /data/tools/
 /data/work/
 /data/**/aluevuokraus_*
+/data/aluevuokraus_alue.geojson
 /data/**/helsinki_area_rentals_local*
 /data/**/municipal_land_evidence_local*
 /data/**/local-municipal-land*
 /data/**/espoo_city_land_wms*
+/data/building_ownership.csv
 /web/node_modules/
 /web/dist/
 /web/public/

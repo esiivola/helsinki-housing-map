@@ -129,25 +129,9 @@ layers:
     methodology: Direct Helsinki building-register dwelling count.
     caveat_ids: [helsinki-only-building-register]
     source_ids: [helsinki_buildings]
-  - layer_id: plot_tenure
-    finnish_label: Tontin hallintamuoto
-    description: Positiiviseen näyttöön perustuva tontin hallintamuoto.
-    kind: categorical
-    unit: null
-    formatter: label
-    allowed_categories: [owned, leased, mixed]
-    allowed_min: null
-    allowed_max: null
-    default_enabled: false
-    default_weight: 1
-    visualization_scale: discrete
-    visualization_range: null
-    methodology: Positive land evidence only.
-    caveat_ids: [evidence-based-not-title-search]
-    source_ids: [espoo_city_land, vantaa_property_map, helsinki_lease_decisions]
   - layer_id: land_owner_class
     finnish_label: Maanomistus
-    description: Positiiviseen näyttöön perustuva maan omistus.
+    description: Kaupungin tai muun omistajan luokitus; puuttuva näyttö jää tiedoksi puuttuvaksi.
     kind: categorical
     unit: null
     formatter: label
@@ -158,8 +142,8 @@ layers:
     default_weight: 1
     visualization_scale: discrete
     visualization_range: null
-    methodology: Positive licensed land-owner evidence only; absent or partial evidence is unknown.
-    caveat_ids: [evidence-based-not-title-search]
+    methodology: Helsinki uses a local derived city-or-other-owner classification; Espoo uses full-footprint city-land evidence only.
+    caveat_ids: [evidence-based-not-title-search, derived-owner-classification]
     source_ids: [espoo_city_land]
   - layer_id: noise_day_upper_db
     finnish_label: Päivämelun yläraja

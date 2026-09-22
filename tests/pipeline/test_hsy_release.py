@@ -15,13 +15,17 @@ from pipeline.models import BuildingValue, Confidence, LayerValueRecord, SourceM
 FIXTURE = Path(__file__).parents[1] / "fixtures" / "hsy_buildings.geojson"
 PAAVO_FIXTURE = Path(__file__).parents[1] / "fixtures" / "paavo_areas.geojson"
 NOISE_FIXTURE = Path(__file__).parents[1] / "fixtures" / "helsinki_noise_2022.geojson"
-VANTAA_FIXTURE = Path(__file__).parents[1] / "fixtures" / "vantaa_property_map.geojson"
 OSM_FIXTURE = Path(__file__).parents[1] / "fixtures" / "osm_destinations.osm"
 GROCERY_STORE_LAYERS = {f"grocery_store_{group}_walk_m" for group in ("prisma", "k_citymarket", "lidl", "s_market", "k_supermarket", "sale", "k_market", "alepa", "other_supermarket", "other_grocery")}
 
 
 def _helsinki_buildings_fixture(path: Path) -> Path:
     path.write_text(json.dumps({"type": "FeatureCollection", "features": [{"type": "Feature", "properties": {"vtj_prt": "fixture-1", "c_rakennusluokka": "0121", "c_hissi": "x", "c_lammtapa": "1", "c_poltaine": "9", "i_kerrlkm": 7, "i_asuinhuoneistojen_lkm": 42}, "geometry": {"type": "Polygon", "coordinates": [[[24.9, 60.1], [24.91, 60.1], [24.91, 60.11], [24.9, 60.11], [24.9, 60.1]]]}}]}))
+    return path
+
+
+def _helsinki_building_ownership_fixture(path: Path) -> Path:
+    path.write_text("building_id,luokka\nfixture-1,kaupunki\n")
     return path
 
 
@@ -40,16 +44,13 @@ def test_overview_summaries_use_numeric_medians_and_categorical_modes() -> None:
         LayerValueRecord("a", "land_owner_class", BuildingValue(ValueState.KNOWN, ValueKind.SCALAR, "city")),
         LayerValueRecord("b", "land_owner_class", BuildingValue(ValueState.KNOWN, ValueKind.SCALAR, "city")),
         LayerValueRecord("c", "land_owner_class", BuildingValue(ValueState.KNOWN, ValueKind.SCALAR, "non_city")),
-        LayerValueRecord("d", "plot_tenure", BuildingValue(ValueState.KNOWN, ValueKind.SCALAR, "owned")),
-        LayerValueRecord("e", "plot_tenure", BuildingValue(ValueState.KNOWN, ValueKind.SCALAR, "leased")),
         LayerValueRecord("a", "building_year", BuildingValue(ValueState.KNOWN, ValueKind.MULTI, None, values=(1990, 2010))),
     ]
 
-    assert _overview_summaries(records, ["a", "b", "c", "d", "e"]) == {
+    assert _overview_summaries(records, ["a", "b", "c"]) == {
         "income_median_eur": {"min": 20, "median": 40, "max": 100},
         "building_year": {"min": 2000, "median": 2000, "max": 2000},
         "land_owner_class": {"value": "city", "mode_share": 2 / 3},
-        "plot_tenure": {"value": "mixed", "mode_share": 0.5},
     }
 
 
@@ -245,12 +246,12 @@ def test_hsy_release_exports_only_residential_buildings_and_year_evidence(tmp_pa
         noise_source_manifest=_noise_source_manifest(),
         night_noise_snapshot=NOISE_FIXTURE,
         night_noise_source_manifest=_night_noise_source_manifest(),
-        vantaa_property_snapshot=VANTAA_FIXTURE,
-        vantaa_property_source_manifest=_vantaa_source_manifest(),
         osm_snapshot=OSM_FIXTURE,
         osm_source_manifest=_osm_source_manifest(),
         helsinki_buildings_snapshot=_helsinki_buildings_fixture(tmp_path / "helsinki-buildings.geojson"),
         helsinki_buildings_source_manifest=_helsinki_buildings_source_manifest(),
+        helsinki_building_ownership_snapshot=_helsinki_building_ownership_fixture(tmp_path / "building_ownership.csv"),
+        helsinki_building_ownership_source_manifest=_helsinki_building_ownership_source_manifest(),
         active_plans_snapshot=active_plans,
         active_plans_source_manifest=_active_plans_source_manifest(),
         source_crs=4326,
@@ -272,8 +273,9 @@ def test_hsy_release_exports_only_residential_buildings_and_year_evidence(tmp_pa
     assert distributions["version"] == 1
     assert any(item["layer_id"] == "income_median_eur" for item in distributions["distributions"])
     layers = json.loads((tmp_path / "layers.json").read_text())
+    assert next(layer for layer in layers if layer["layer_id"] == "land_owner_class")["source_ids"] == ["helsinki_building_ownership"]
     assert {layer["layer_id"] for layer in layers} >= {
-        "building_year", "house_type", "elevator", "heating_method", "heating_energy_source", "storey_count", "dwelling_count", "plot_tenure", "land_owner_class", "noise_day_upper_db", "noise_night_upper_db",
+        "building_year", "house_type", "elevator", "heating_method", "heating_energy_source", "storey_count", "dwelling_count", "land_owner_class", "noise_day_upper_db", "noise_night_upper_db",
         "forest_walk_m", "shore_walk_m", "daycare_walk_m", "school_walk_m", "healthcare_walk_m", "library_walk_m",
         *GROCERY_STORE_LAYERS, "income_median_eur",
     }
@@ -358,6 +360,8 @@ def test_hsy_release_exports_only_residential_buildings_and_year_evidence(tmp_pa
     assert facts["storey_count"]["value"] == 7
     assert facts["dwelling_count"]["value"] == 42
     assert facts["dwelling_count"]["evidence_ids"] == ["helsinki-building-facts"]
+    assert facts["land_owner_class"]["value"] == "city"
+    assert facts["land_owner_class"]["evidence_ids"] == ["helsinki-building-ownership"]
     income = next(value for value in attributes["building_values"] if value["layer_id"] == "income_median_eur")
     assert income["value"] == 32700
     assert income["evidence_ids"] == ["paavo-postal-area-income"]
@@ -368,10 +372,10 @@ def test_hsy_release_exports_only_residential_buildings_and_year_evidence(tmp_pa
     assert night_noise["value"] == 55
     assert night_noise["evidence_ids"] == ["helsinki-noise-night-upper-bound"]
     sources = json.loads((tmp_path / "sources.json").read_text())
-    assert {source["source_id"] for source in sources} == {"hsy_buildings", "helsinki_buildings", "paavo_income", "helsinki_noise_2022", "helsinki_noise_night_2022", "helsinki_active_plans", "vantaa_property_map", "hsl_osm_extract"}
+    assert {source["source_id"] for source in sources} == {"hsy_buildings", "helsinki_buildings", "helsinki_building_ownership", "paavo_income", "helsinki_noise_2022", "helsinki_noise_night_2022", "helsinki_active_plans", "hsl_osm_extract"}
     assert all(set(layer["source_ids"]) <= {source["source_id"] for source in sources} for layer in layers)
     assert {value["layer_id"] for value in attributes["building_values"]} >= {
-        "building_year", "house_type", "elevator", "heating_method", "heating_energy_source", "storey_count", "dwelling_count", "plot_tenure", "land_owner_class", "noise_day_upper_db", "noise_night_upper_db",
+        "building_year", "house_type", "elevator", "heating_method", "heating_energy_source", "storey_count", "dwelling_count", "land_owner_class", "noise_day_upper_db", "noise_night_upper_db",
         "forest_walk_m", "shore_walk_m", "daycare_walk_m", "school_walk_m", "healthcare_walk_m", "library_walk_m",
         *GROCERY_STORE_LAYERS, "income_median_eur",
     }
@@ -392,13 +396,26 @@ def test_hsy_release_requires_espoo_city_land_snapshot_and_provenance_together(t
     try:
         build_hsy_release(
             FIXTURE, tmp_path, _source_manifest(), PAAVO_FIXTURE, _paavo_source_manifest(), NOISE_FIXTURE,
-            _noise_source_manifest(), VANTAA_FIXTURE, _vantaa_source_manifest(), OSM_FIXTURE,
+            _noise_source_manifest(), OSM_FIXTURE,
             _osm_source_manifest(), source_crs=4326, espoo_city_land_snapshot=tmp_path / "city-land.geojson",
         )
     except ValueError as error:
         assert str(error) == "Espoo city-land snapshot and source manifest must be provided together"
     else:
         raise AssertionError("expected city-land provenance validation failure")
+
+
+def test_hsy_release_requires_helsinki_ownership_snapshot_and_provenance_together(tmp_path: Path) -> None:
+    try:
+        build_hsy_release(
+            FIXTURE, tmp_path, _source_manifest(), PAAVO_FIXTURE, _paavo_source_manifest(), NOISE_FIXTURE,
+            _noise_source_manifest(), OSM_FIXTURE,
+            _osm_source_manifest(), source_crs=4326, helsinki_building_ownership_snapshot=tmp_path / "building_ownership.csv",
+        )
+    except ValueError as error:
+        assert str(error) == "Helsinki building ownership snapshot and source manifest must be provided together"
+    else:
+        raise AssertionError("expected ownership provenance validation failure")
 
 
 def test_hsy_release_publishes_service_group_background_layers_only_with_snapshots(tmp_path: Path) -> None:
@@ -415,7 +432,7 @@ def test_hsy_release_publishes_service_group_background_layers_only_with_snapsho
     service_manifest = SourceManifest("service_map_education", "Service Map", "https://example.test/service-map", "https://creativecommons.org/licenses/by/4.0/", "CC-BY-4.0", "Service Map", "2026-09-09T12:00:00+03:00", "2026-09-09", "Metro", "sha256:fixture", "fixture", ("fixture",), "allowed", "fixture")
     ptv_manifest = SourceManifest("ptv_healthcare", "PTV", "https://example.test/ptv", "https://creativecommons.org/publicdomain/zero/1.0/", "CC0-1.0", "PTV", "2026-09-09T12:00:00+03:00", "2026-09-09", "Metro", "sha256:fixture", "fixture", ("fixture",), "allowed", "fixture")
 
-    build_hsy_release(FIXTURE, tmp_path, _source_manifest(), PAAVO_FIXTURE, _paavo_source_manifest(), NOISE_FIXTURE, _noise_source_manifest(), VANTAA_FIXTURE, _vantaa_source_manifest(), OSM_FIXTURE, _osm_source_manifest(), source_crs=4326, service_map_snapshot=service_map, service_map_source_manifest=service_manifest, ptv_health_snapshot=healthcare, ptv_health_source_manifest=ptv_manifest)
+    build_hsy_release(FIXTURE, tmp_path, _source_manifest(), PAAVO_FIXTURE, _paavo_source_manifest(), NOISE_FIXTURE, _noise_source_manifest(), OSM_FIXTURE, _osm_source_manifest(), source_crs=4326, service_map_snapshot=service_map, service_map_source_manifest=service_manifest, ptv_health_snapshot=healthcare, ptv_health_source_manifest=ptv_manifest)
 
     layers = {layer["layer_id"]: layer for layer in json.loads((tmp_path / "layers.json").read_text())}
     values = json.loads(gzip.decompress((tmp_path / "attributes" / "Helsinki.json.gz").read_bytes()))["building_values"]
@@ -459,6 +476,17 @@ def _helsinki_buildings_source_manifest() -> SourceManifest:
         licence_url="https://creativecommons.org/licenses/by/4.0/", licence_id="CC-BY-4.0", attribution="Helsingin kaupunki",
         retrieved_at="2026-08-30T12:00:00+03:00", vintage="2026-08-30", coverage="Helsinki", checksum="sha256:fixture",
         processing_method="VTJ-PRT join and Building Classification 2018 mapping", caveats=("fixture",), redistribution_decision="allowed", rationale="Open licence confirmed",
+    )
+
+
+def _helsinki_building_ownership_source_manifest() -> SourceManifest:
+    return SourceManifest(
+        source_id="helsinki_building_ownership", name="Helsinki building ownership classification",
+        source_url="https://example.test/helsinki-ownership", licence_url="https://example.test/licence",
+        licence_id="derived", attribution="Fixture", retrieved_at="2026-09-22T12:00:00+03:00",
+        vintage="2026-09-22", coverage="Helsinki", checksum="sha256:fixture",
+        processing_method="fixture", caveats=("fixture",), redistribution_decision="derived_only",
+        rationale="Only derived values are published.",
     )
 
 
@@ -525,19 +553,6 @@ def _night_noise_source_manifest() -> SourceManifest:
         caveats=("Modeled zone upper bound, not a building-level maximum.",),
         redistribution_decision="allowed",
         rationale="The published dataset is CC BY 4.0.",
-    )
-
-
-def _vantaa_source_manifest() -> SourceManifest:
-    return SourceManifest(
-        source_id="vantaa_property_map", name="Vantaa property map",
-        source_url="https://gis.vantaa.fi/geoserver/wfs",
-        licence_url="https://creativecommons.org/licenses/by/4.0/", licence_id="CC-BY-4.0",
-        attribution="Vantaan kaupunki", retrieved_at="2026-08-27T10:00:00+03:00",
-        vintage="2026-08-27", coverage="Vantaa", checksum="sha256:fixture",
-        processing_method="Offline positive lease-area evidence overlay",
-        caveats=("Only explicit vuokraalue polygons support leased tenure.",),
-        redistribution_decision="allowed", rationale="The published dataset is CC BY 4.0.",
     )
 
 

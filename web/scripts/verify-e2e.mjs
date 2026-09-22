@@ -69,7 +69,7 @@ async function measureLoadedInspector(index) {
     const latitude = 60.16975;
     const mercatorY = (value) => Math.log(Math.tan(Math.PI / 4 + value * Math.PI / 360));
     const world = 512 * 2 ** 12;
-    const target = "Tunnus: fixture-building-mixed";
+    const target = "Tunnus: fixture-building-non-city";
     const startedAt = performance.now();
     const observer = new MutationObserver(() => {
       if (!document.querySelector('aside[aria-label="Rakennuksen tiedot"]')?.textContent?.includes(target)) return;
@@ -135,13 +135,13 @@ try {
   const inspector = page.locator('aside[aria-label="Rakennuksen tiedot"]');
   if (!await inspector.getByRole("heading", { name: "Rakennuksen tiedot" }).evaluate((element) => document.activeElement === element)) throw new Error("Inspector heading did not receive focus");
   await inspector.locator("details.inspector-evidence > summary").click();
-  await inspector.getByText("Tunnus: fixture-building-mixed").waitFor();
-  await inspector.getByText(/Maanomistus: sekoittunut.*osuudet: kaupunki 60 %, muu omistaja 40 %/).waitFor();
+  await inspector.getByText("Tunnus: fixture-building-non-city").waitFor();
+  await inspector.getByText("Maanomistus: muu omistaja").waitFor();
   await inspector.getByRole("button", { name: "Tietoa palvelusta" }).click();
   const info = page.getByRole("dialog", { name: "Tietoa palvelusta" });
-  const sourceLink = info.getByRole("link", { name: "Avaa lähde: Espoo city land ownership" });
+  const sourceLink = info.getByRole("link", { name: "Avaa lähde: Helsinki building ownership classification" });
   await sourceLink.waitFor();
-  if (await sourceLink.getAttribute("href") !== "https://example.test/espoo") throw new Error("Evidence source link is missing");
+  if (await sourceLink.getAttribute("href") !== "https://example.test/helsinki-ownership") throw new Error("Evidence source link is missing");
   await info.getByText("CC BY 4.0").waitFor();
   await page.waitForFunction(() => {
     const button = document.querySelector('[role="dialog"] button[data-dialog-initial-focus]');

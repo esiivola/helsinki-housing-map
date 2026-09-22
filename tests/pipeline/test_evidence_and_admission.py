@@ -54,17 +54,16 @@ def test_excluded_source_cannot_enter_a_public_release() -> None:
 
 
 def test_absent_land_evidence_remains_unknown() -> None:
-    result = resolve_land_evidence([], "plot_tenure")
+    result = resolve_land_evidence([], "land_owner_class")
 
     assert result.state is ValueState.UNKNOWN
     assert result.value is None
 
 
-def test_positive_city_and_lease_evidence_are_kept_separate() -> None:
+def test_unrelated_land_evidence_does_not_change_owner_class() -> None:
     records = [evidence(LandClaim.CITY), evidence(LandClaim.LEASED, "evidence-2")]
 
     assert resolve_land_evidence(records, "land_owner_class").value == "city"
-    assert resolve_land_evidence(records, "plot_tenure").value == "leased"
 
 
 def test_conflicting_positive_evidence_is_not_resolved_by_input_order() -> None:

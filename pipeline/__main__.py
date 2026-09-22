@@ -12,7 +12,6 @@ PAAVO_SNAPSHOT = Path("data/raw/paavo_2026.geojson")
 HELSINKI_NOISE_SNAPSHOT = Path("data/raw/helsinki_noise_2022_day_upper.geojson")
 HELSINKI_NIGHT_NOISE_SNAPSHOT = Path("data/raw/helsinki_noise_2022_night_upper.geojson")
 HELSINKI_ACTIVE_PLANS_SNAPSHOT = Path("data/raw/helsinki_active_plans_2026-08-30.geojson")
-VANTAA_PROPERTY_SNAPSHOT = Path("data/raw/vantaa_property_map_2026.geojson")
 OSM_SNAPSHOT = Path("data/raw/hsl_osm_2026-08-25.pbf")
 GTFS_SNAPSHOT = Path("data/raw/hsl_gtfs_2026-08-27.zip")
 WORKPLACE_TRANSIT_BATCHES = Path("data/work/transit-workplace-morning-batches")
@@ -54,11 +53,14 @@ def main() -> int:
     hsy_release.add_argument("--noise-snapshot", type=Path, default=HELSINKI_NOISE_SNAPSHOT)
     hsy_release.add_argument("--night-noise-snapshot", type=Path, default=HELSINKI_NIGHT_NOISE_SNAPSHOT)
     hsy_release.add_argument("--active-plans-snapshot", type=Path, default=HELSINKI_ACTIVE_PLANS_SNAPSHOT)
-    hsy_release.add_argument("--vantaa-property-snapshot", type=Path, default=VANTAA_PROPERTY_SNAPSHOT)
     hsy_release.add_argument("--espoo-city-land-snapshot", type=Path)
     hsy_release.add_argument("--espoo-city-land-retrieved-at")
     hsy_release.add_argument("--espoo-city-land-vintage")
     hsy_release.add_argument("--espoo-city-land-checksum")
+    hsy_release.add_argument("--helsinki-building-ownership-snapshot", type=Path)
+    hsy_release.add_argument("--helsinki-building-ownership-retrieved-at")
+    hsy_release.add_argument("--helsinki-building-ownership-vintage")
+    hsy_release.add_argument("--helsinki-building-ownership-checksum")
     hsy_release.add_argument("--vantaa-buildings-snapshot", type=Path)
     hsy_release.add_argument("--vantaa-buildings-retrieved-at")
     hsy_release.add_argument("--vantaa-buildings-vintage")
@@ -133,6 +135,36 @@ def main() -> int:
             )
         elif any(espoo_city_land_provenance):
             parser.error("Espoo city-land provenance requires --espoo-city-land-snapshot")
+        helsinki_building_ownership_source_manifest = None
+        helsinki_building_ownership_provenance = (
+            arguments.helsinki_building_ownership_retrieved_at,
+            arguments.helsinki_building_ownership_vintage,
+            arguments.helsinki_building_ownership_checksum,
+        )
+        if arguments.helsinki_building_ownership_snapshot is not None:
+            if not all(helsinki_building_ownership_provenance):
+                parser.error("--helsinki-building-ownership-snapshot requires complete provenance")
+            helsinki_building_ownership_source_manifest = SourceManifest(
+                source_id="helsinki_building_ownership",
+                name="Helsinki public rental decisions",
+                source_url="https://paatokset.hel.fi/fi/",
+                licence_url="https://paatokset.hel.fi/fi/",
+                licence_id="decision-evidence",
+                attribution="Helsingin kaupunki",
+                retrieved_at=arguments.helsinki_building_ownership_retrieved_at,
+                vintage=arguments.helsinki_building_ownership_vintage,
+                coverage="Helsinki",
+                checksum=arguments.helsinki_building_ownership_checksum,
+                processing_method="Local city-or-other owner classification derived from public rental decisions and joined by building ID",
+                caveats=(
+                    "Other owner is a derived residual class, not a cadastral title search.",
+                    "No decision documents or personal data are published.",
+                ),
+                redistribution_decision="derived_only",
+                rationale="Only the derived building-level class and source provenance are published; the raw local input and decision documents are excluded.",
+            )
+        elif any(helsinki_building_ownership_provenance):
+            parser.error("Helsinki building ownership provenance requires --helsinki-building-ownership-snapshot")
         vantaa_buildings_source_manifest = None
         vantaa_buildings_provenance = (arguments.vantaa_buildings_retrieved_at, arguments.vantaa_buildings_vintage, arguments.vantaa_buildings_checksum)
         if arguments.vantaa_buildings_snapshot is not None:
@@ -263,20 +295,10 @@ def main() -> int:
             ),
             espoo_city_land_snapshot=arguments.espoo_city_land_snapshot,
             espoo_city_land_source_manifest=espoo_city_land_source_manifest,
+            helsinki_building_ownership_snapshot=arguments.helsinki_building_ownership_snapshot,
+            helsinki_building_ownership_source_manifest=helsinki_building_ownership_source_manifest,
             vantaa_buildings_snapshot=arguments.vantaa_buildings_snapshot,
             vantaa_buildings_source_manifest=vantaa_buildings_source_manifest,
-            vantaa_property_snapshot=arguments.vantaa_property_snapshot,
-            vantaa_property_source_manifest=SourceManifest(
-                source_id="vantaa_property_map", name="Vantaa property map",
-                source_url="https://gis.vantaa.fi/geoserver/wfs",
-                licence_url="https://creativecommons.org/licenses/by/4.0/", licence_id="CC-BY-4.0",
-                attribution="Vantaan kaupunki", retrieved_at="2026-08-27T10:09:00+03:00",
-                vintage="2026-08-27", coverage="Vantaa",
-                checksum="sha256:9114c49ac203d97e70bd1779e87f9e1cde087635f760c50ab2073566c52d37fa",
-                processing_method="Offline positive lease-area evidence overlay",
-                caveats=("Only explicit vuokraalue polygons support leased tenure.",),
-                redistribution_decision="allowed", rationale="The published dataset is CC BY 4.0.",
-            ),
             osm_snapshot=arguments.osm_snapshot,
             osm_source_manifest=SourceManifest(
                 source_id="hsl_osm_extract", name="HSL-area OpenStreetMap extract",
